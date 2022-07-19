@@ -74,6 +74,7 @@ for alpha in alpha_vals:
 
 # Merge dataframes for all the alpha values
 all_data = pd.concat([alpha_dfs[alpha] for alpha in alpha_vals])
+print(all_data.iloc[0])
 
 # Construct and apply scalers for all feature and target quantities
 # target scaler
@@ -107,6 +108,8 @@ features_list = ['T_feat', 'P_HI_feat', 'P_HeI_feat', 'P_HeII_feat', 'P_CVI_feat
 # Extract data columns of features, target
 features = all_data[features_list]
 labels = all_data[['target']]
+print(features.iloc[0])
+print(labels.iloc[0])
 
 # Do a train-test split
 train_features, test_features, train_labels, test_labels = train_test_split(features, labels, test_size = 0.33, random_state = 24)
@@ -118,7 +121,7 @@ dtest = xgb.DMatrix(test_features, test_labels)
 # Get dictionary of parameter values for the grid search from config file
 grid_search_params = {}
 for key in config['grid_search_params']:
-    if key == 'n_estimators':
+    if key == 'max_depth' or key == 'lambda' or key == 'alpha' or key == 'n_estimators':
         grid_search_params[key] = [int(x.strip()) for x in config['grid_search_params'][key].split(',')]
     else:
         grid_search_params[key] = [float(x.strip()) for x in config['grid_search_params'][key].split(',')]
@@ -128,13 +131,13 @@ grid_search_params['sampling_method'] = ['uniform']
 print(grid_search_params)
 
 # Set up the XGBoost model to optimize hyperparameters for
-regressor = xgb.XGBRegressor(objective = 'reg:squarederror', early_stopping_rounds = 10)
+regressor = xgb.XGBRegressor(objective = 'reg:squarederror')
 
 # Set up the grid search
 grid_search = GridSearchCV(estimator = regressor, # The model to optimize
                            param_grid = grid_search_params, # The parameter grid
                            scoring = 'neg_mean_squared_error', # The scoring system
-                           verbose = 3 # How much info to print
+                           verbose = 2 # How much info to print
                            )
 
 # Execute the grid search
