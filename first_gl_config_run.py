@@ -81,15 +81,6 @@ print(all_data.iloc[0])
 target_scaler = MinMaxScaler().fit(np.log10(all_data[target].values).reshape(-1,1))
 all_data['target'] = target_scaler.transform(np.log10(all_data[target].values).reshape(-1,1))
 
-# Define a function to go from feature name in config file to column name
-def feature_to_column(feature_name):
-    if feature_name == 'T' or feature_name == 't':
-        return 'log10(T) [K]'
-    elif feature_name == 'n_b':
-        return 'log10(n_b) [cm^{-3}]'
-    else:
-        return feature_name.upper()
-
 # Loop through all features (for now, I'll do this manually since there are some quirks)
 T_scaler =  MinMaxScaler().fit(all_data['log10(T) [K]'].values.reshape(-1, 1)) # Fit the scaler
 all_data['T_feat'] = T_scaler.transform(all_data['log10(T) [K]'].values.reshape(-1, 1)) # Apply the scaler
