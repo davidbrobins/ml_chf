@@ -18,10 +18,12 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
     '''
 
     # Photoionization rate data column names
-    prate_cols = ['log10(f_q)', 'log10(tau_0)', 'P_LW', 'P_HI', 'P_HeI', 
-                  'P_HeII', 'P_CVI', 'P_Al13', 'P_Fe26', 'P_CI', 'P_C04',
-                  'P_C05', 'P_O06', 'P_O08', 'P_F09', 'P_Ne10', 'P_Na11',
-                  'P_Mg12', 'P_Si14', 'P_S16', 'P_Ar18', 'P_Ca20'] 
+    prate_cols = ['log10(f_q)', 'log10(tau_0)', 'log10(P_LW) [s^{-1}]', 'log10(P_HI) [s^{-1}]', 'log10(P_HeI) [s^{-1}]', 
+                  'log10(P_HeII) [s^{-1}]', 'log10(P_CVI) [s^{-1}]', 'log10(P_Al13) [s^{-1}]', 'log10(P_Fe26) [s^{-1}]', 
+                  'log10(P_CI) [s^{-1}]', 'log10(P_C04) [s^{-1}]', 'log10(P_C05) [s^{-1}]', 'log10(P_O06) [s^{-1}]', 
+                  'log10(P_O08) [s^{-1}]', 'log10(P_F09) [s^{-1}]', 'log10(P_Ne10) [s^{-1}]', 'log10(P_Na11) [s^{-1}]',
+                  'log10(P_Mg12) [s^{-1}]', 'log10(P_Si14) [s^{-1}]', 'log10(P_S16) [s^{-1}]', 'log10(P_Ar18) [s^{-1}]', 
+                  'log10(P_Ca20) [s^{-1}]'] 
     # CHF data column names
     chf_cols = ['log10(n_b) [cm^{-3}]', 'log10(T) [K]', 'log10(J_0/n_b/J_{MW})', 
                 'log10(f_q)', 'log10(tau_0)', 'CF_0', 'CF_1', 'CF_2', 'HF_0', 
@@ -32,19 +34,20 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
     # Loop through alpha values
     for alpha in alpha_vals:
         # Read in photoionization rate data at this alpha value
-        p_rates = pd.read_csv(data_path + 'p_rate_data/prates_'+str(alpha)+'.dat', sep= '\s+', names = prate_cols)
+        p_rates = pd.read_csv(data_path + '/p_rate_data/prates_'+str(alpha)+'.dat', sep= '\s+', names = prate_cols)
         # Read in CHF data at this alpha value
-        chf = pd.read_csv(data_path + 'chf_data/d'+str(alpha)+'.res', skiprows = 2, sep='\s+',
+        chf = pd.read_csv(data_path + '/chf_data/d'+str(alpha)+'.res', skiprows = 2, sep='\s+',
                           usecols = [0, 1, 2, 3, 4, 11, 12, 13, 16, 17, 18], names = chf_cols)
         
         # Calculate target
-        chf[target] = sum([chf[output + '_' +str(i)] * (2**i) for i in range(metallicity+1)])
+        chf[target] = np.log10(sum([chf[output + '_' +str(i)] * (2**i) for i in range(metallicity+1)]))
         
         # Merge the two dataframes on the matching columns (fq, tau0)
         merged = chf.merge(p_rates, on = ['log10(f_q)', 'log10(tau_0)'])
-        # Now scale each photoionization rate by J0 (first two entries of prate_cols are NOT photoionization rates)
+        # Now scale each photoionization rate by J0 and take log10
+        # (first two entries of prate_cols are NOT photoionization rates)
         for col in prate_cols[2:]:
-            merged[col] = merged[col] * 10 ** merged['log10(J_0/n_b/J_{MW})']
+            merged[col] = np.log10(merged[col] * 10 ** merged['log10(J_0/n_b/J_{MW})'])
         
         # Add a column with the alpha value
         merged['alpha'] = alpha

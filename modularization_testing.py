@@ -6,6 +6,8 @@ from config import *
 from training_data_io import *
 # Import module to convert feature names to column names
 from column_definition import *
+# Import module to rescale features, target
+from data_scaling import *
 
 # Directory with config file
 model_dir = 'models/modular_test/'
@@ -38,5 +40,12 @@ data_df = get_training_data(data_path, alpha_vals, target, output, metallicity, 
 print(data_df)
 
 # Get column names corresponding to features
-columns = get_col_names(features)
+columns = [get_col_names(feat) for feat in features]
 print(columns)
+
+# Apply feature and target scaling
+data_df = rescale(features, target, data_df, model_dir)
+print(data_df[columns])
+print(data_df[features])
+print(data_df[target])
+print(data_df['target'])

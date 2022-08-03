@@ -23,7 +23,7 @@ def read_config_file(model_dir):
     # Set up configuration file parsing
     config = configparser.ConfigParser()
     # Read in the configuration file (named 'config.ini').
-    config.read(model_dir + 'config.ini')
+    config.read(model_dir + '/config.ini')
 
     # Get the path to the training data
     data_path = config['IO']['training_data_path']
@@ -41,7 +41,7 @@ def read_config_file(model_dir):
         alpha_vals = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0] 
     
     # Get string to label target column with
-    target = config['target_params']['output'] + '_Z_' + config['target_params']['Z']
+    target = 'log10('+ config['target_params']['output'] + '_Z_' + config['target_params']['Z'] + ') [erg cm^{3} s^{-1}]'
     # Get string of output type (CF or HF)
     output = config['target_params']['output']
     # Get numerical value of metallicity
