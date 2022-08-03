@@ -23,7 +23,7 @@ def read_config_file(model_dir):
     # Set up configuration file parsing
     config = configparser.ConfigParser()
     # Read in the configuration file (named 'config.ini').
-    config.read(model_dir + '/config.ini')
+    config.read(model_dir + 'config.ini')
 
     # Get the path to the training data
     data_path = config['IO']['training_data_path']
@@ -48,15 +48,15 @@ def read_config_file(model_dir):
     metallicity = int(config['target_params']['Z'])
 
     # Get list of features for the XGBoost model
-    features = [key for key in config['features']]
+    features = [key + '_feat' for key in config['features']]
     
     # Get dictionary of training data parameters to restrict, and the values to restrict them to
     # Set up dictionary
     restricted_params = {}
     # Loop through names of parameters to restrict
     for key in config['restricted_input_params']:
-        # Set the key to the appropriate value
-        restricted_params[key] = config['restricted_input_params'][key]
+        # Set the key to the appropriate value, as a float
+        restricted_params[key] = float(config['restricted_input_params'][key])
 
     # Get dictionary of hyperparameters to include in grid search, and the arrays of values to consider for them
     # Set up dictionary

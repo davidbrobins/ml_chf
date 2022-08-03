@@ -32,9 +32,9 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
     # Loop through alpha values
     for alpha in alpha_vals:
         # Read in photoionization rate data at this alpha value
-        p_rates = pd.read_csv(data_path + '/p_rate_data/prates_'+str(alpha)+'.dat', sep= '\s+', names = prate_cols)
+        p_rates = pd.read_csv(data_path + 'p_rate_data/prates_'+str(alpha)+'.dat', sep= '\s+', names = prate_cols)
         # Read in CHF data at this alpha value
-        chf = pd.read_csv(data_path + '/chf_data/d'+str(alpha)+'.res', skiprows = 2, sep='\s+',
+        chf = pd.read_csv(data_path + 'chf_data/d'+str(alpha)+'.res', skiprows = 2, sep='\s+',
                           usecols = [0, 1, 2, 3, 4, 11, 12, 13, 16, 17, 18], names = chf_cols)
         
         # Calculate target
