@@ -4,6 +4,8 @@
 import pandas as pd
 # Import train-test splitting from sklearn
 from sklearn.model_selection import train_test_split
+# Import xgboost
+import xgboost as xgb
 
 def get_split_xgboost_data(data_df, features, train_frac, random_seed):
     '''
@@ -30,7 +32,7 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed):
 
     # Convert the features, labels to XGBoost DMatrix datatype
     dtrain = xgb.DMatrix(train_features, train_labels)
-    dgs = xgb.DMatrix(gs_feature, gs_labels)
+    dgs = xgb.DMatrix(gs_features, gs_labels)
 
     # Return the DMatrixes for training, grid search
     return dtrain, dgs

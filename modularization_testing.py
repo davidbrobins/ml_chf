@@ -8,6 +8,8 @@ from training_data_io import *
 from column_definition import *
 # Import module to rescale features, target
 from data_scaling import *
+# Import module to package features, target for xgboost
+from ml_preprocessing import *
 
 # Directory with config file
 model_dir = 'models/modular_test/'
@@ -28,6 +30,7 @@ grid_search_params = config_entries[9]
 
 print(data_path)
 print(random_seed)
+print(train_frac)
 print(alpha_vals)
 print(target)
 print(output)
@@ -50,3 +53,8 @@ print(data_df[columns])
 print(data_df[features])
 print(data_df[target])
 print(data_df['target'])
+
+# Do train-grid search split and get DMatrixes for xgboost
+dtrain, dgs = get_split_xgboost_data(data_df, features, train_frac, random_seed)
+print(dtrain)
+print(dgs)

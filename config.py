@@ -29,10 +29,10 @@ def read_config_file(model_dir):
     # Get the path to the training data
     data_path = config['IO']['training_data_path']
 
-    # Get random seed
-    random_seed = config['ml_data_prep']['random_seed']
+    # Get random seed as an integer
+    random_seed = int(config['ml_data_prep']['random_seed'])
     # Get fraction of input data table to use for model training (rest for grid search validation).
-    train_frac = config['ml_data_prep']['train_frac']
+    train_frac = float(config['ml_data_prep']['train_frac'])
     
     # Get list of alpha values to read in from training data
     # Check if alpha is given as a restricted parameter
