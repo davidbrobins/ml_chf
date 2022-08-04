@@ -17,13 +17,14 @@ config_entries = read_config_file(model_dir)
 # Unpack the results
 data_path = config_entries[0]
 random_seed = config_entries[1]
-alpha_vals = config_entries[2]
-target = config_entries[3]
-output = config_entries[4]
-metallicity = config_entries[5]
-features = config_entries[6]
-restricted_params = config_entries[7]
-grid_search_params = config_entries[8]
+train_frac = config_entries[2]
+alpha_vals = config_entries[3]
+target = config_entries[4]
+output = config_entries[5]
+metallicity = config_entries[6]
+features = config_entries[7]
+restricted_params = config_entries[8]
+grid_search_params = config_entries[9]
 
 print(data_path)
 print(random_seed)

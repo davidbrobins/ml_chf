@@ -11,6 +11,7 @@ def read_config_file(model_dir):
     Output:
     data_path (str): Path to directory containing the training data.
     random_seed (int): Random seed (for reproducibility)
+    train_frac (flt): Fraction of data to use for training (rest for grid search validation).
     alpha_vals (list): List of values of alpha parameter (which indexes training data) to use in training.
     target (str): String labelling the target for XGBoost to predict.
     output (str): String specifying whether model is for CF or HF.
@@ -29,7 +30,9 @@ def read_config_file(model_dir):
     data_path = config['IO']['training_data_path']
 
     # Get random seed
-    random_seed = config['IO']['random_seed']
+    random_seed = config['ml_data_prep']['random_seed']
+    # Get fraction of input data table to use for model training (rest for grid search validation).
+    train_frac = config['ml_data_prep']['train_frac']
     
     # Get list of alpha values to read in from training data
     # Check if alpha is given as a restricted parameter
@@ -74,5 +77,5 @@ def read_config_file(model_dir):
     # Add a sampling method (not set in config file)
     grid_search_params['sampling_method'] = ['uniform']
 
-    return data_path, random_seed, alpha_vals, target, output, metallicity, features, restricted_params, grid_search_params
+    return data_path, random_seed, train_frac, alpha_vals, target, output, metallicity, features, restricted_params, grid_search_params
 
