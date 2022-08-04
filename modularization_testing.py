@@ -10,6 +10,10 @@ from column_definition import *
 from data_scaling import *
 # Import module to package features, target for xgboost
 from ml_preprocessing import *
+# Import module for hyperparameter grid search
+from grid_search_tools import *
+# Import module for model training
+from model_training import *
 
 # Directory with config file
 model_dir = 'models/modular_test/'
@@ -55,6 +59,14 @@ print(data_df[target])
 print(data_df['target'])
 
 # Do train-grid search split and get DMatrixes for xgboost
-dtrain, dgs = get_split_xgboost_data(data_df, features, train_frac, random_seed)
+dtrain, gs_features, gs_labels = get_split_xgboost_data(data_df, features, train_frac, random_seed)
 print(dtrain)
-print(dgs)
+print(gs_features)
+print(gs_labels)
+
+# Do grid search
+best_params = do_grid_search(gs_features, gs_labels, grid_search_params, model_dir)
+print(best_params)
+
+# Train model with optimized hyperparameters
+train_model(dtrain, best_params, model_dir)

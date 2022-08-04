@@ -17,7 +17,8 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed):
     random_seed (int): Seed to make train-test split reproducible.
     Output:
     dtrain (DMatrix): DMatrix containing the features, labels for training data.
-    dgs (DMatrix): DMatrix contianing the features, labels for grid search data.
+    gs_features (dataframe): Dataframe contianing the features for grid search data.
+    gs_labels (dataframe): Dataframe containing the labels for grid search data.
     '''
 
     # Get dataframe containing just feature columns
@@ -32,7 +33,6 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed):
 
     # Convert the features, labels to XGBoost DMatrix datatype
     dtrain = xgb.DMatrix(train_features, train_labels)
-    dgs = xgb.DMatrix(gs_features, gs_labels)
 
     # Return the DMatrixes for training, grid search
-    return dtrain, dgs
+    return dtrain, gs_features, gs_labels
