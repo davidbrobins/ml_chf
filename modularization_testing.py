@@ -32,41 +32,54 @@ features = config_entries[7]
 restricted_params = config_entries[8]
 grid_search_params = config_entries[9]
 
-print(data_path)
-print(random_seed)
-print(train_frac)
-print(alpha_vals)
-print(target)
-print(output)
-print(metallicity)
-print(restricted_params)
-print(features)
-print(grid_search_params)
+print('Data path:', data_path)
+print('Random seed:', random_seed)
+print('Training fraction:', train_frac)
+print('Alpha values:', alpha_vals)
+print('Target name:', target)
+print('CF or HF:', output)
+print('Metallicity:', metallicity)
+print('Restricted input parameters:', restricted_params)
+print('Features list:', features)
+print('Grid search parameters:', grid_search_params)
 
 # Read in data
 data_df = get_training_data(data_path, alpha_vals, target, output, metallicity, restricted_params)
-print(data_df)
+print('All training data:', data_df)
 
 # Get column names corresponding to features
 columns = [get_col_names(feat) for feat in features]
-print(columns)
+print('Column names to use:', columns)
 
 # Apply feature and target scaling
 data_df = rescale(features, target, data_df, model_dir)
-print(data_df[columns])
-print(data_df[features])
-print(data_df[target])
-print(data_df['target'])
+print('Unscaled features:', data_df[columns])
+print('Scaled features:', data_df[features])
+print('Unscaled target:', data_df[target])
+print('Scaled target:', data_df['target'])
 
 # Do train-grid search split and get DMatrixes for xgboost
-dtrain, gs_features, gs_labels = get_split_xgboost_data(data_df, features, train_frac, random_seed)
-print(dtrain)
-print(gs_features)
-print(gs_labels)
+split_data = get_split_xgboost_data(data_df, features, train_frac, random_seed)
+dtrain = split_data[0]
+train_features = split_data[1]
+train_labels = split_data[2]
+gs_features = split_data[3]
+gs_labels = split_data[4]
+dtest = split_data[5]
+test_features = split_data[6]
+test_labels = split_data[7]
+print('Training data features:', train_features)
+print('Training data labels:', train_labels)
+print('Grid search data features:', gs_features)
+print('Grid search data labels:', gs_labels)
+print('Testing data features:', test_features)
+print('Testing data labels:', test_labels)
 
 # Do grid search
 best_params = do_grid_search(gs_features, gs_labels, grid_search_params, model_dir)
-print(best_params)
+print('Best parameters from grid search:', best_params)
 
 # Train model with optimized hyperparameters
 train_model(dtrain, best_params, model_dir)
+
+

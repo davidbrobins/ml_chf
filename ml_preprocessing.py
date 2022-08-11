@@ -9,7 +9,7 @@ import xgboost as xgb
 
 def get_split_xgboost_data(data_df, features, train_frac, random_seed):
     '''
-    Function to create train, test DMatrix to feed into XGBoost.
+    Function to create training, grid search validation, and test sets from the data, and package them as needed for XGBoost.
     Input:
     data_df (dataframe): The training data, with columns for the rescaled features, target.
     features (list of str): The list of desired XGBoost model features.
@@ -17,8 +17,13 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed):
     random_seed (int): Seed to make train-test split reproducible.
     Output:
     dtrain (DMatrix): DMatrix containing the features, labels for training data.
-    gs_features (dataframe): Dataframe contianing the features for grid search data.
+    train_features (dataframe): Dataframe containing the features for training data.
+    train_labels (dataframe): Dataframe containing the labels for training data.
+    gs_features (dataframe): Dataframe containing the features for grid search data.
     gs_labels (dataframe): Dataframe containing the labels for grid search data.
+    dtest (DMatrix): DMatrix containing the features, labels for test data.
+    test_features (dataframe): Dataframe containing the features for test data.
+    test_labels (dataframe): Dataframe containing the labels for test data.
     '''
 
     # Get dataframe containing just feature columns
@@ -26,13 +31,18 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed):
     # get dataframe containing just target column
     target_df = data_df[['target']]
 
-    # Do the train-grid search split, using training fraction and random seed supplied
-    train_features, gs_features, train_labels, gs_labels = train_test_split(features_df, target_df, 
+    # Do the train-test search split, using training fraction and random seed supplied
+    train_features, test_features, train_labels, test_labels = train_test_split(features_df, target_df, 
                                                                             test_size = 1 - train_frac, 
                                                                             random_state = random_seed)
-
-    # Convert the features, labels to XGBoost DMatrix datatype
+    # Now split off 10% of the training set for grid search/validation (change random seed by 1)
+    train_features, gs_features, train_labels, gs_labels = train_test_split(train_features, train_labels,
+                                                                            test_size = 0.1,
+                                                                            random_state = random_seed + 1)
+    
+    # Convert the features, labels for train, test sets to XGBoost DMatrix datatype
     dtrain = xgb.DMatrix(train_features, train_labels)
-
+    dtest = xgb.DMatrix(test_features, test_labels)
+    
     # Return the DMatrixes for training, grid search
-    return dtrain, gs_features, gs_labels
+    return dtrain, train_features, train_labels, gs_features, gs_labels, dtest, test_features, test_labels

@@ -6,3 +6,6 @@ data/
 
 # Pickle files
 *.pkl
+
+# PDF plots
+*.pdf
