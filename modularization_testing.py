@@ -14,6 +14,8 @@ from ml_preprocessing import *
 from grid_search_tools import *
 # Import module for model training
 from model_training import *
+# Import module for model evaluation on test set.
+from model_evaluation import *
 
 # Directory with config file
 model_dir = 'models/modular_test/'
@@ -22,24 +24,24 @@ model_dir = 'models/modular_test/'
 config_entries = read_config_file(model_dir)
 # Unpack the results
 data_path = config_entries[0]
-random_seed = config_entries[1]
-train_frac = config_entries[2]
-alpha_vals = config_entries[3]
-target = config_entries[4]
-output = config_entries[5]
-metallicity = config_entries[6]
-features = config_entries[7]
-restricted_params = config_entries[8]
+target = config_entries[1]
+output = config_entries[2]
+metallicity = config_entries[3]
+alpha_vals = config_entries[4]
+restricted_params = config_entries[5]
+random_seed = config_entries[6]
+train_frac = config_entries[7]
+features = config_entries[8]
 grid_search_params = config_entries[9]
 
 print('Data path:', data_path)
-print('Random seed:', random_seed)
-print('Training fraction:', train_frac)
-print('Alpha values:', alpha_vals)
 print('Target name:', target)
-print('CF or HF:', output)
+print('CF or HF?:', output)
 print('Metallicity:', metallicity)
-print('Restricted input parameters:', restricted_params)
+print('Alpha values:', alpha_vals)
+print('Restricted data table parameters:', restricted_params)
+print('Random seed:', random_seed)
+print('Fraction of data table to use for training/grid search:', train_frac)
 print('Features list:', features)
 print('Grid search parameters:', grid_search_params)
 
@@ -52,7 +54,7 @@ columns = [get_col_names(feat) for feat in features]
 print('Column names to use:', columns)
 
 # Apply feature and target scaling
-data_df = rescale(features, target, data_df, model_dir)
+data_df, feature_scalers, target_scaler = rescale(features, target, data_df, model_dir)
 print('Unscaled features:', data_df[columns])
 print('Scaled features:', data_df[features])
 print('Unscaled target:', data_df[target])
@@ -80,6 +82,9 @@ best_params = do_grid_search(gs_features, gs_labels, grid_search_params, model_d
 print('Best parameters from grid search:', best_params)
 
 # Train model with optimized hyperparameters
-train_model(dtrain, best_params, model_dir)
+model = train_model(dtrain, best_params, model_dir)
 
-
+# Evaluate model on test set
+model_results = evaluate_model(dtest, test_features, test_labels, model,
+                               features, feature_scalers, target_scaler, model_dir)
+print('Results on testing set:', model_results)

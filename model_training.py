@@ -11,7 +11,7 @@ def train_model(dtrain, hyperparams, model_dir):
     hyperparams (dict): Dictionary of desired hyperparameter values for training model.
     model_dir (str): Path to directory containing relevant config file, to save the model.
     Output:
-    None, but saves the model in model_dir as a text file.
+    model (XGBoost model): The trained model (also saved).
     '''
     
     # Train the model
@@ -21,6 +21,8 @@ def train_model(dtrain, hyperparams, model_dir):
         model = xgb.train(hyperparams, dtrain)
     # Save the model
     model.save_model(model_dir + '/trained_model.txt')
+
+    return model
 
 
     

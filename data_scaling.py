@@ -19,6 +19,7 @@ def rescale_feature(feature_name, data_df, model_dir, scaler_type = preprocessin
     scaler_type (scaler): Type of scaler to apply (defaults ot MinMaxScaler())
     Output:
     data_df (dataframe): The training data, with a new column containing the rescaled feature.
+    scaler: The trained scaler.
     '''
     
     # Fit the scaler
@@ -29,7 +30,7 @@ def rescale_feature(feature_name, data_df, model_dir, scaler_type = preprocessin
     dump(scaler, open(model_dir + '/'+feature_name+'_scaler.pkl', 'wb'))
     
     # Return the updated dataframe
-    return data_df
+    return data_df, scaler
 
 def rescale_target(target_name, data_df, model_dir, scaler_type = preprocessing.MinMaxScaler()):
     '''
@@ -41,6 +42,7 @@ def rescale_target(target_name, data_df, model_dir, scaler_type = preprocessing.
     scaler_type (scaler): Type of scaler to apply (defaults ot MinMaxScaler())  
     Output:
     data_df (dataframe): The training data, with new column containing the rescaled target.
+    scaler: The trained scaler.
     '''
 
     # Fit the scaler
@@ -51,7 +53,7 @@ def rescale_target(target_name, data_df, model_dir, scaler_type = preprocessing.
     dump(scaler, open(model_dir + '/target_scaler.pkl', 'wb'))
 
     # Return the updated dataframe
-    return data_df
+    return data_df, scaler
 
 
 def rescale(features, target, data_df, model_dir, scaler_type = preprocessing.MinMaxScaler()):
@@ -64,14 +66,20 @@ def rescale(features, target, data_df, model_dir, scaler_type = preprocessing.Mi
     model_dir (str): Path to the directory containing the relevant config file (saved scalers will be placed there).
     Output:
     data_df (dataframe): The training data, with new columns containing rescaled features, target.
+    feature_scalers (dict): A dictionary of the trained feature scalers.
+    target_scaler: The trained features scalers.
     '''
-    
+
+    # Create a blank dictionary for the feature scalers
+    feature_scalers = {}
     # Iterate through features
     for feature in features:
         # Rescale that feature
-        data_df = rescale_feature(feature, data_df, model_dir, scaler_type = scaler_type)
+        data_df, scaler = rescale_feature(feature, data_df, model_dir, scaler_type = scaler_type)
+        # Put the feature into a dictionary
+        feature_scalers[feature] = scaler
     # Rescale the target
-    data_df = rescale_target(target, data_df, model_dir, scaler_type = scaler_type)
-    
+    data_df, target_scaler = rescale_target(target, data_df, model_dir, scaler_type = scaler_type)
+
     # Return the updated dataframe
-    return data_df
+    return data_df, feature_scalers, target_scaler
