@@ -1,19 +1,30 @@
 # Module to train and save an XGBoost model on training data
 
 # Import xgboost
-import xgboost as xgb 
+import xgboost as xgb
+# Import loading from pickle
+from pickle import load
+# Import warnings
+import warnings
+# Import os module to check for a file
+import os
 
-def train_model(dtrain, hyperparams, model_dir):
+def train_model(dtrain, model_dir):
     '''
-    Function to train and save an xgboost model on training data, with given hyperparameters.
+    Function to train and save an xgboost model on training data, with optimized hyperparameters.
     Input:
     dtrain (DMatrix): DMatrix containing features, target for randomly selected subset of training data.
-    hyperparams (dict): Dictionary of desired hyperparameter values for training model.
     model_dir (str): Path to directory containing relevant config file, to save the model.
     Output:
     model (XGBoost model): The trained model (also saved).
     '''
-    
+
+    # Check if pickle file containing optimized hyperparameters exists
+    if not os.path.exists(model_dir + '/best_params.pkl'):
+        # If not, issue a warning
+        warnings.warn('No optimized hyperparameters found in model directors. Please run python rungrid.py model_dir/ before training model.')
+    hyperparams = load(open(model_dir + '/best_params.pkl', 'rb'))
+
     # Train the model
     if 'n_estimators' in hyperparams: # If hyperparams contains a number of estimators, use it
         model = xgb.train(hyperparams, dtrain, hyperparams['n_estimators'])
