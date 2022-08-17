@@ -34,31 +34,31 @@ train_frac = config_entries[7]
 features = config_entries[8]
 grid_search_params = config_entries[9]
 
-print('Data path:', data_path)
-print('Target name:', target)
-print('CF or HF?:', output)
-print('Metallicity:', metallicity)
-print('Alpha values:', alpha_vals)
-print('Restricted data table parameters:', restricted_params)
-print('Random seed:', random_seed)
-print('Fraction of data table to use for training/grid search:', train_frac)
-print('Features list:', features)
-print('Grid search parameters:', grid_search_params)
+print('Data path: \n', data_path)
+print('Target name: \n', target)
+print('CF or HF?: \n', output)
+print('Metallicity: \n', metallicity)
+print('Alpha values: \n', alpha_vals)
+print('Restricted data table parameters: \n', restricted_params)
+print('Random seed: \n', random_seed)
+print('Fraction of data table to use for training/grid search: \n', train_frac)
+print('Features list: \n', features)
+print('Grid search parameters: \n', grid_search_params)
 
 # Read in data
 data_df = get_training_data(data_path, alpha_vals, target, output, metallicity, restricted_params)
-print('All training data:', data_df)
+print('All training data: \n', data_df)
 
 # Get column names corresponding to features
 columns = [get_col_names(feat) for feat in features]
-print('Column names to use:', columns)
+print('Column names to use: \n', columns)
 
 # Apply feature and target scaling
-data_df, feature_scalers, target_scaler = rescale(features, target, data_df, model_dir)
-print('Unscaled features:', data_df[columns])
-print('Scaled features:', data_df[features])
-print('Unscaled target:', data_df[target])
-print('Scaled target:', data_df['target'])
+data_df = rescale(features, target, data_df, model_dir)
+print('Unscaled features: \n', data_df[columns])
+print('Scaled features: \n', data_df[features])
+print('Unscaled target: \n', data_df[target])
+print('Scaled target: \n', data_df['target'])
 
 # Do train-grid search split and get DMatrixes for xgboost
 split_data = get_split_xgboost_data(data_df, features, train_frac, random_seed)
@@ -70,21 +70,21 @@ gs_labels = split_data[4]
 dtest = split_data[5]
 test_features = split_data[6]
 test_labels = split_data[7]
-print('Training data features:', train_features)
-print('Training data labels:', train_labels)
-print('Grid search data features:', gs_features)
-print('Grid search data labels:', gs_labels)
-print('Testing data features:', test_features)
-print('Testing data labels:', test_labels)
+print('Training data features: \n', train_features)
+print('Training data labels: \n', train_labels)
+print('Grid search data features: \n', gs_features)
+print('Grid search data labels: \n', gs_labels)
+print('Testing data features: \n', test_features)
+print('Testing data labels: \n', test_labels)
 
 # Do grid search
 best_params = do_grid_search(gs_features, gs_labels, grid_search_params, model_dir)
-print('Best parameters from grid search:', best_params)
+print('Best parameters from grid search: \n', best_params)
 
 # Train model with optimized hyperparameters
 model = train_model(dtrain, best_params, model_dir)
 
 # Evaluate model on test set
 model_results = evaluate_model(dtest, test_features, test_labels, model,
-                               features, feature_scalers, target_scaler, model_dir)
-print('Results on testing set:', model_results)
+                               features, model_dir)
+print('Results on testing set: \n', model_results)
