@@ -47,7 +47,7 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
         # Now scale each photoionization rate by J0 and take log10
         # (first two entries of prate_cols are NOT photoionization rates)
         for col in prate_cols[2:]:
-            merged[col] = np.log10(merged[col] * 10 ** merged['log10(J_0/n_b/J_{MW})'])
+            merged[col] = np.log10(merged[col]) + merged['log10(J_0/n_b/J_{MW})']
         
         # Add a column with the alpha value
         merged['alpha'] = alpha
