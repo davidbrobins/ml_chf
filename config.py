@@ -11,13 +11,14 @@ def read_config_file(model_dir):
     Output:
     config_entries (dict): A dictionary containing:
     -data_path (str): Path to directory containing the training data.
-    -target (str): String labelling the target for XGBoost to predict.                                                                                                                                   
-    -output (str): String specifying whether to read in CF or HF from data table.                                                                                                                        
-    -metallicity (int): Integer value of metallicity (0, 1, or 2) at which to read in output from the data table.                                                                                        
+    -target (str): String labelling the target for XGBoost to predict.                                                                                               
+    -output (str): String specifying whether to read in CF or HF from data table.                                                                      
+    -metallicity (int): Integer value of metallicity (0, 1, or 2) at which to read in output from the data table.                                               
     -alpha_vals (list): List of values of alpha parameter (which indexes training data) to use in training.
     -restricted_params (dict): Dictionary containing training data parameters restricted to one value, and those values.
     -random_seed (int): Random seed (for reproducibility)
     -train_frac (flt): Fraction of data to use for training (90%) and grid search validation (10%), rest for testing the trained model.
+    -scale_chf (bool): Whether or not to scale log10(CHF) [i.e. output] to interval 0-1 with min-max scaling
     -features (list): List of parameters to use as features in the XGBoost model.
     -grid_search_params (dict): Dictionary containing arrays of values for the hyperparameters to grid search through.
     '''
@@ -42,22 +43,24 @@ def read_config_file(model_dir):
         # If so, get its value
         config_entries['alpha_vals'] = [float(config['IO']['alpha'])]
     else:
-        # Otherwise, just use all 7 possible values                                                                                                                                                      
+        # Otherwise, just use all 7 possible values                                                                                                            
         config_entries['alpha_vals'] = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
-    # Get dictionary of training data parameters to restrict, and the values to restrict them to                                                                                                         
-    # Set up dictionary                                                                                                                                                                                  
+    # Get dictionary of training data parameters to restrict, and the values to restrict them to                                                            
+    # Set up dictionary                                                                                                                                          
     restricted_params = {}
-    # Loop through names of parameters to restrict                                                                                                                                                       
+    # Loop through names of parameters to restrict                                                                                                          
     for key in config['IO']:
         # Check if key is a column which can be restricted
         if key == 'log10(T) [K]' or key == 'log10(n_b) [cm^{-3}]' or key == 'log10(J_0/n_b/J_{MW})' or key == 'log10(f_q)' or key == 'log10(tau_0)':
-            # Set the key to the appropriate value, as a float                                                                                                                                           
+            # Set the key to the appropriate value, as a float                                                                                                   
             restricted_params[key] = float(config['IO'][key])
     config_entries['restricted_params'] = restricted_params
     # Get random seed as an integer
     config_entries['random_seed'] = int(config['ml_data_prep']['random_seed'])
     # Get fraction of input data table to use for model training (rest for grid search validation).
     config_entries['train_frac'] = float(config['ml_data_prep']['train_frac'])
+    # Get boolean flag giving whether or not to scale output value to 0-1
+    config_entries['scale_chf'] = eval(config['ml_data_prep']['scale_chf'])
     
     # Get list of features for the XGBoost model
     config_entries['features'] = [key + '_feat' for key in config['features']]

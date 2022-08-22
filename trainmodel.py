@@ -30,7 +30,7 @@ data_df = training_data_io.get_training_data(config_entries['data_path'], config
                                              config_entries['metallicity'], config_entries['restricted_params'])
 
 # Apply feature and target scaling
-data_df = data_scaling.rescale(config_entries['features'], config_entries['target'], data_df, model_dir)
+data_df = data_scaling.rescale(config_entries['features'], config_entries['target'], config_entries['scale_chf'], data_df, model_dir)
 
 # Do train-test split to get grid search data
 split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['features'],
@@ -42,6 +42,7 @@ model = model_training.train_model(split_data['dtrain'], model_dir)
 # Evaluate the model on test data
 model_results = model_evaluation.evaluate_model(split_data['dtest'], split_data['test_features'],
                                                 split_data['test_labels'], model,
-                                                config_entries['features'], model_dir)
+                                                config_entries['features'], config_entries['scale_chf'],
+                                                model_dir)
 
 
