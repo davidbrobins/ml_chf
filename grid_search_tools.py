@@ -27,8 +27,9 @@ def do_grid_search(gs_features, gs_labels, grid_search_params, model_dir):
     # Set up the grid search
     grid_search = GridSearchCV(estimator = regressor, # The model to optimize
                                param_grid = grid_search_params, # The parameter grid
-                               scoring = 'neg_mean_squared_error' # The scoring system
-                               )
+                               scoring = 'neg_mean_squared_error', # The scoring system
+                               verbose = 2, # Display a lot of the output to track progress
+                               n_jobs = -1) # Use all available CPU processors
 
     # Execute the grid search
     grid_search.fit(gs_features, gs_labels)

@@ -41,7 +41,7 @@ def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf
         scaler = scalers[feature]
         # Unscale the feature
         model_results[get_col_names(feature)] = scaler.inverse_transform(test_features[feature].values.reshape(-1,1))
-    # Check if target is scaled
+    # Check if target is scaled                                                                                                                                                                          
     if scale_chf == True:
         # Unscale the model prediction
         target_scaler = scalers['target'] # Get scaler
@@ -51,7 +51,7 @@ def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf
     # Otherwise, no need to unscale predictions or true values.
     else:
         model_results['prediction'] = pred # Predictions are just the prediction (no unscaling required)
-        model_results['truth'] = test_labels['target'] # True values are just the test labels (no unscaling required)
+        model_results['truth'] = test_labels['target'].values # True values are just the test labels (no unscaling required)
     
     # Save the model results
     model_results.to_pickle(model_dir + '/model_results.pkl')
