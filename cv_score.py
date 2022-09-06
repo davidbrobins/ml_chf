@@ -18,13 +18,13 @@ def array_to_hyperparams(params):
     param_dict (dict): A dictionary of the hyperparameters specified by the array.
     '''
 
-    param_dict = {max_depth = np.int(np.ceil(np.abs(params[0]))), # Must be a positive integer (so take ceiling of absolute value, force to be integer
-                  min_child_weight = np.abs(params[1]), # Must be non-negative                                                                                                                     
-                  subsample = params[2] - np.floor(params[2]), # Must be between 0 and 1                                                                                                           
-                  colsample_bytree = params[3] - np.floor(params[3]), # Must be between 0 and 1                                                                                                    
-                  gamma = np.abs(params[4]), # Must be non-negative                                                                                                                                
-                  eta = np.abs(params[5]), # Must be non-negative                                                                                                                                  
-                  n_estimators = np.int(np.ceil(np.abs(params[6]))) # Must be a positive integer
+    param_dict = {'max_depth' = np.int(np.ceil(np.abs(params[0]))), # Must be a positive integer (so take ceiling of absolute value, force to be integer
+                  'min_child_weight' = np.abs(params[1]), # Must be non-negative                                                                                                                     
+                  'subsample' = params[2] - np.floor(params[2]), # Must be between 0 and 1                                                                                                           
+                  'colsample_bytree' = params[3] - np.floor(params[3]), # Must be between 0 and 1                                                                                                    
+                  'gamma' = np.abs(params[4]), # Must be non-negative                                                                                                                                
+                  'eta' = np.abs(params[5]), # Must be non-negative                                                                                                                                  
+                  'n_estimators' = np.int(np.ceil(np.abs(params[6]))) # Must be a positive integer
                   }
 
 def get_model_cv_score(params, val_features, val_labels):
