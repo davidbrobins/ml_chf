@@ -41,7 +41,7 @@ data_df = data_scaling.rescale(config_entries['features'], config_entries['targe
 # Do train-test split to get grid search data
 split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['features'],
                                                      config_entries['train_frac'], config_entries['random_seed'])
-
+'''
 # Get time before grid search
 before_gs = time.time()
 
@@ -52,7 +52,7 @@ gs_best_params = grid_search_tools.do_grid_search(split_data['gs_features'], spl
 # Display the optimal hyperparameters from the grid search
 print('Best parameters from grid search: \n', gs_best_params)
 print('Time for grid search:', time.time() - before_gs)
-
+'''
 # Before simplex optimizer
 before_so = time.time()
 
