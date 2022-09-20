@@ -11,7 +11,7 @@ from column_definition import *
 # From pickle import read
 from pickle import load
 
-def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf, model_dir):
+def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf, model_dir, opt_type):
     '''
     Function to run model predictions on test data.
     Input:
@@ -22,6 +22,7 @@ def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf
     features (list): List of feature names.
     scale_chf (bool): Flag giving whether or not target is scaled to 0-1.
     model_dir (str): The path to the directory containing the appropriate config file (to save the results and read scalers).
+    opt_type (str): Two-letter code for the method used to find hyperparameters (currently: 'gs' for grid search, 'sp' for scipy optimization).
     Output:
     model_results (dataframe): Unscaled features, target values (also saved).
     '''
@@ -54,7 +55,7 @@ def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf
         model_results['truth'] = test_labels['target'].values # True values are just the test labels (no unscaling required)
     
     # Save the model results
-    model_results.to_pickle(model_dir + '/model_results.pkl')
+    model_results.to_pickle(model_dir + '/' + opt_type + '_model_results.pkl')
 
     return model_results
 

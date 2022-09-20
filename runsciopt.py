@@ -1,5 +1,5 @@
-# Python script to compare hyperparameter optimization methods from a model directory with a config file
-# Syntax to run: python optimizers_test.py configdir/
+# Python script to run scipy hyperparameter optimization method from a model directory with a config file
+# Syntax to run: python runsciopt.py configdir/ start_params_file
 # (/ not needed)
 
 # Imports:
@@ -13,22 +13,23 @@ import training_data_io
 import data_scaling
 # Module to package features/target for ML model, do train-test split
 import ml_preprocessing
-# Module to implement hyperparameter grid search
-import grid_search_tools
-# Module to get cross-validation fold scores
-import cv_score
 # Module to run simplex optimization
-import simplex_opt_tools
-# Timing module
-import time
+import scipy_opt_tools
 # Numpy for math
 import numpy as np
+# Pickle to read in pickle file
+from pickle import load
 
-# Unpack command line arguments (this file, path to config file directory)
-(pyfilename, model_dir) = sys.argv
+# Unpack command line arguments (this file, path to config file directory, filepath for file containing the parameters to start from)
+(pyfilename, model_dir, params_file) = sys.argv
+# Print the params_file file path
+print('Path to initial hyperparameters: ', params_file)
 
 # Parse configuration files
 config_entries = config.read_config_file(model_dir)
+
+# Parse the initial parameters
+ihp = load(open(params_file, 'rb'))
 
 # Read in data
 data_df = training_data_io.get_training_data(config_entries['data_path'], config_entries['alpha_vals'],
@@ -41,22 +42,10 @@ data_df = data_scaling.rescale(config_entries['features'], config_entries['targe
 # Do train-test split to get grid search data
 split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['features'],
                                                      config_entries['train_frac'], config_entries['random_seed'])
-# Get time before grid search
-before_gs = time.time()
-
-# Do grid search
-gs_best_params = grid_search_tools.do_grid_search(split_data['gs_features'], split_data['gs_labels'],
-                                               config_entries['grid_search_params'], model_dir)
-
-# Display the optimal hyperparameters from the grid search
-print('Best parameters from grid search: \n', gs_best_params)
-print('Time for grid search:', time.time() - before_gs)
-
-# Before simplex optimizer
-before_so = time.time()
 
 # Set up simplex optimizer
-so_best_params = simplex_opt_tools.do_simplex_opt(split_data['gs_features'], split_data['gs_labels'],
-                                                  model_dir)
-print('Best parameters from simplex optimizer: \n', so_best_params)
-print('Time for simplex optimization:', time.time() - before_so)
+sp_best_params = scipy_opt_tools.do_scipy_opt(split_data['gs_features'], split_data['gs_labels'], model_dir,
+                                              params = [ihp['max_depth'], ihp['min_child_weight'], ihp['subsample'], ihp['colsample_bytree'], ihp['gamma'], ihp['eta'], ihp['n_estimators']],
+                                              model = 'Nelder_Mead') # Simplex optimization (can change for different optimization method
+
+print('Best parameters from scipy optimizer: \n', sp_best_params)

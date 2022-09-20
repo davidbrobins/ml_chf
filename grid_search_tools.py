@@ -6,6 +6,8 @@ from sklearn.model_selection import GridSearchCV
 import xgboost as xgb
 # Import saving method for pickle files
 from pickle import dump
+# Time module for timing the grid search
+import time
 
 def do_grid_search(gs_features, gs_labels, grid_search_params, model_dir):
     '''
@@ -20,10 +22,15 @@ def do_grid_search(gs_features, gs_labels, grid_search_params, model_dir):
     best_params (dict): Dictionary of optimal values for each hyperparameter explored in the grid search.
     Saves pickle files of the grid search results and optimized hyperparameters.
     '''
-
+    # Start timing
+    start = time.time()
+    
     # Set up the XGBoost model to optimize, which minimizes squared error
     regressor = xgb.XGBRegressor(objective = 'reg:squarederror')
 
+    # Make sure the regressor uses GPU
+    grid_search_params['tree_method'] = ['gpu_hist']
+    
     # Set up the grid search
     grid_search = GridSearchCV(estimator = regressor, # The model to optimize
                                param_grid = grid_search_params, # The parameter grid
@@ -34,13 +41,16 @@ def do_grid_search(gs_features, gs_labels, grid_search_params, model_dir):
     # Execute the grid search
     grid_search.fit(gs_features, gs_labels)
 
+    # Print how long it took
+    print('Time for grid search: ', time.time()-start)
+    
     # Get results, save them
     dump(grid_search.cv_results_, open(model_dir + '/grid_search_results.pkl', 'wb'))
 
     # Get best parameters
     best_params = grid_search.best_params_
-    # Save them
-    dump(best_params, open(model_dir + '/best_params.pkl', 'wb'))
+    # Save them, marked as from grid search
+    dump(best_params, open(model_dir + '/gs_best_params.pkl', 'wb'))
     # Return them
     return best_params
     

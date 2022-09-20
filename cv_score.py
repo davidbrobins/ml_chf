@@ -25,8 +25,10 @@ def array_to_hyperparams(params):
                   'colsample_bytree' : params[3] - np.floor(params[3]), # Must be between 0 and 1                                                                                                    
                   'gamma' : np.abs(params[4]), # Must be non-negative                                                                                                                                
                   'eta' : np.abs(params[5]), # Must be non-negative                                                                                                                                  
-                  'n_estimators' : np.int(np.ceil(np.abs(params[6]))) # Must be a positive integer
+                  'n_estimators' : np.int(np.ceil(np.abs(params[6]))), # Must be a positive integer
+                  'tree_method' : 'gpu_hist' # Use GPU for training
                   }
+
     # Return the dictionary
     return param_dict
 
@@ -44,6 +46,7 @@ def get_model_cv_score(params, val_features, val_labels):
     
     # Set up an xgboost regression module using the given hyperparameters
     regressor = xgb.XGBRegressor(objective = 'reg:squarederror')
+    
     # Set the parameters (convert using function defined above)
     regressor.set_params(**array_to_hyperparams(params))
     

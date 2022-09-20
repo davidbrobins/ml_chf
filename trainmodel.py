@@ -1,5 +1,5 @@
 # Python script to train model on training data using optimized hyperparameter, then evaluate it on test set.
-# Syntax to run: python trainmodel.py configdir/
+# Syntax to run: python trainmodel.py configdir/ opt_type
 # (/ not needed)
 
 # Imports:
@@ -18,8 +18,8 @@ import model_training
 # Moduel to evaluate model
 import model_evaluation
 
-# Unpack command line arguments (this file, path to config file directory)
-(pyfilename, model_dir) = sys.argv
+# Unpack command line arguments (this file, path to config file directory, two-letter code for the method used to find best model hyperparameters)
+(pyfilename, model_dir, opt_type) = sys.argv
 
 # Parse configuration files
 config_entries = config.read_config_file(model_dir)
@@ -37,12 +37,12 @@ split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['fe
                                                      config_entries['train_frac'], config_entries['random_seed'])
 
 # Train the model
-model = model_training.train_model(split_data['dtrain'], model_dir)
+model = model_training.train_model(split_data['dtrain'], model_dir, opt_type)
 
 # Evaluate the model on test data
 model_results = model_evaluation.evaluate_model(split_data['dtest'], split_data['test_features'],
                                                 split_data['test_labels'], model,
                                                 config_entries['features'], config_entries['scale_chf'],
-                                                model_dir)
+                                                model_dir, opt_type)
 
 
