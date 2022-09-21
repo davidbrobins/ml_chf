@@ -46,6 +46,6 @@ split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['fe
 # Set up simplex optimizer
 sp_best_params = scipy_opt_tools.do_scipy_opt(split_data['gs_features'], split_data['gs_labels'], model_dir,
                                               params = [ihp['max_depth'], ihp['min_child_weight'], ihp['subsample'], ihp['colsample_bytree'], ihp['gamma'], ihp['eta'], ihp['n_estimators']],
-                                              model = 'Nelder_Mead') # Simplex optimization (can change for different optimization method
+                                              method = 'Nelder-Mead') # Simplex optimization (can change for different optimization method
 
 print('Best parameters from scipy optimizer: \n', sp_best_params)
