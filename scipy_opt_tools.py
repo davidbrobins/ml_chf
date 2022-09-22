@@ -33,10 +33,11 @@ def do_scipy_opt(gs_features, gs_labels, model_dir, params = np.array([6, 1.0, 1
     start = time.time()
     
     sp_opt = minimize(cv_score.get_model_cv_score, # The function to minimize (average mean squared error from 5 k-fold cross-validation)
-                       params, # Starting values of hyperparameters (defaults to default values)
-                       args = (gs_features, gs_labels), # The dataset to feed into the cross-validation (validation data)
-                       method = method # Method for optimization
-                       )
+                      params, # Starting values of hyperparameters (defaults to default values)
+                      args = (gs_features, gs_labels), # The dataset to feed into the cross-validation (validation data)
+                      method = method # Method for optimization
+                      # options = {'fatol' : 0.01} # Set function tolerance to something pretty large
+                      )
 
     # Extract best value of parameters, min error
     best_params = cv_score.array_to_hyperparams(sp_opt.x) # Convert to a dictionary with parameter names, allowable values
