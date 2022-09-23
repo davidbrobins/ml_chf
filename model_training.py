@@ -15,7 +15,7 @@ def train_model(dtrain, model_dir, opt_type):
     Input:
     dtrain (DMatrix): DMatrix containing features, target for randomly selected subset of training data.
     model_dir (str): Path to directory containing relevant config file, to save the model.
-    opt_type (str): Two-letter code specifying method used to find hyperparameters (currently: 'gs' for grid search, 'sp' for scipy optimization).
+    opt_type (str): Two-letter code specifying method used to find hyperparameters (currently: 'gs' for grid search, 'sp' for scipy optimization, 'bs' for Bayes search).
     Output:
     model (XGBoost model): The trained model (also saved).
     '''

@@ -22,7 +22,7 @@ def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf
     features (list): List of feature names.
     scale_chf (bool): Flag giving whether or not target is scaled to 0-1.
     model_dir (str): The path to the directory containing the appropriate config file (to save the results and read scalers).
-    opt_type (str): Two-letter code for the method used to find hyperparameters (currently: 'gs' for grid search, 'sp' for scipy optimization).
+    opt_type (str): Two-letter code for the method used to find hyperparameters (currently: 'gs' for grid search, 'sp' for scipy optimization, 'bs' for Bayes search).
     Output:
     model_results (dataframe): Unscaled features, target values (also saved).
     '''
