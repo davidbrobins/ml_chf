@@ -12,7 +12,7 @@ from pickle import dump
 # Import timing module
 import time
 
-def do_scipy_opt(gs_features, gs_labels, model_dir, params = np.array([6, 1.0, 1, 1, 0, 0.3, 100]), method = 'Nelder-Mead'):
+def do_scipy_opt(gs_features, gs_labels, model_dir, params = np.array([6, 1.0, 1, 1, 0, 0.3*10, 100/100]), method = 'Nelder-Mead'):
     '''
     Function to run scipy optimization for hyperparameters on the given validation set, starting from given parameters.  
     Input:
@@ -35,8 +35,8 @@ def do_scipy_opt(gs_features, gs_labels, model_dir, params = np.array([6, 1.0, 1
     sp_opt = minimize(cv_score.get_model_cv_score, # The function to minimize (average mean squared error from 5 k-fold cross-validation)
                       params, # Starting values of hyperparameters (defaults to default values)
                       args = (gs_features, gs_labels), # The dataset to feed into the cross-validation (validation data)
-                      method = method # Method for optimization
-                      # options = {'fatol' : 0.01} # Set function tolerance to something pretty large
+                      method = method, # Method for optimization
+                      options = {'xatol' : 0.1, 'fatol' : 0.1, 'disp' : True} # Set absolute error tolerance in parameters to be 0.01 (parameters should be of order 1-10), return best solution at each iteration
                       )
 
     # Extract best value of parameters, min error

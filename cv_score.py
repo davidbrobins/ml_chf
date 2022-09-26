@@ -24,8 +24,8 @@ def array_to_hyperparams(params):
                   'subsample' : params[2] if params[2] == 1.0 else params[2] - np.floor(params[2]), # Must be between 0 and 1                                                                           
                   'colsample_bytree' : params[3] if params[3] == 1.0 else params[3] - np.floor(params[3]), # Must be between 0 and 1                                                                 
                   'gamma' : np.abs(params[4]), # Must be non-negative                                                                                                                                
-                  'eta' : np.abs(params[5]), # Must be non-negative                                                                                                                                  
-                  'n_estimators' : np.int(np.ceil(np.abs(params[6]))), # Must be a positive integer
+                  'eta' : 0.1*np.abs(params[5]), # Must be non-negative, scale to be of order 0.1                                                                                                       
+                  'n_estimators' : 100*np.int(np.ceil(np.abs(params[6]))), # Must be a positive integer, scale to be of order 100
                   'tree_method' : 'gpu_hist' # Use GPU for training
                   }
 
