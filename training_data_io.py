@@ -40,7 +40,13 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
                           usecols = [0, 1, 2, 3, 4, 11, 12, 13, 16, 17, 18], names = chf_cols)
         
         # Calculate target
-        chf[target] = np.log10(sum([chf[output + '_' +str(i)] * (2**i) for i in range(metallicity+1)]))
+        # Different for different metallicities:
+        if metallicity == 0:
+            chf[target] = np.log10(chf[output + '_0']) # CHF(Z=0)=CHF_0
+        elif metallicity == 1:
+            chf[target] = np.log10(sum([chf[output + '_' + str(i)] for i in range(3)])) # CHF(Z=1)=CHF_0 + CHF_1 + CHF_2
+        elif metallicity == 2:
+            chf[target] = np.log10(sum([chf[output + '_' + str(i)] * (2**i) for i in range(3)])) # CHF(Z=2)=CHF_0 + 2CHF_1 + 4CHF_4
         
         # Merge the two dataframes on the matching columns (fq, tau0)
         merged = chf.merge(p_rates, on = ['log10(f_q)', 'log10(tau_0)'])
