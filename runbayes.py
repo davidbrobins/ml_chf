@@ -26,7 +26,7 @@ config_entries = config.read_config_file(model_dir)
 data_df = training_data_io.get_training_data(config_entries['data_path'], config_entries['alpha_vals'],
                                              config_entries['target'], config_entries['output'],
                                              config_entries['metallicity'], config_entries['restricted_params'])
-
+'''
 # Apply feature and target scaling
 data_df = data_scaling.rescale(config_entries['features'], config_entries['target'], config_entries['scale_chf'], data_df, model_dir)
 
@@ -39,3 +39,4 @@ best_params = bayes_search_tools.do_bayes_search(split_data['gs_features'], spli
                                                  config_entries['grid_search_params'], model_dir)
 # Display the optimal hyperparameters from the grid search
 print('Best parameters from grid search: \n', best_params)
+'''

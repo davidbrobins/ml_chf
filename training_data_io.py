@@ -42,11 +42,11 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
         # Calculate target
         # Different for different metallicities:
         if metallicity == 0:
-            chf[target] = np.log10(chf[output + '_0']) # CHF(Z=0)=CHF_0
+            chf[target] = (chf[output + '_0']).transform(np.log10) # CHF(Z=0)=CHF_0
         elif metallicity == 1:
-            chf[target] = np.log10(sum([chf[output + '_' + str(i)] for i in range(3)])) # CHF(Z=1)=CHF_0 + CHF_1 + CHF_2
+            chf[target] = (chf[output + '_0'] + chf[output + '_1'] + chf[output + '_2']).transform(np.log10) # CHF(Z=1)=CHF_0 + CHF_1 + CHF_2
         elif metallicity == 2:
-            chf[target] = np.log10(sum([chf[output + '_' + str(i)] * (2**i) for i in range(3)])) # CHF(Z=2)=CHF_0 + 2CHF_1 + 4CHF_4
+            chf[target] = (chf[output + '_0'] + 2 * chf[output + '_1'] + 4 * chf[output + '_2']).transform(np.log10) # CHF(Z=2)=CHF_0 + 2CHF_1 + 4CHF_4
         
         # Merge the two dataframes on the matching columns (fq, tau0)
         merged = chf.merge(p_rates, on = ['log10(f_q)', 'log10(tau_0)'])
@@ -69,5 +69,5 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
 
     # Merge dataframes for all the alpha values
     data_df = pd.concat([alpha_dfs[alpha] for alpha in alpha_vals])
-
+    
     return data_df
