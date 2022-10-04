@@ -37,7 +37,7 @@ split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['fe
                                                      config_entries['train_frac'], config_entries['random_seed'])
 
 # Train the model
-model = model_training.train_model(split_data['dtrain'], model_dir, opt_type)
+model = model_training.train_model(split_data['train_features'], split_data['test_features'], model_dir, opt_type)
 
 # Evaluate the model on test data
 model_results = model_evaluation.evaluate_model(split_data['dtest'], split_data['test_features'],
