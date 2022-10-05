@@ -28,7 +28,7 @@ def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf
     '''
 
     # Get model predictions
-    pred = model.predict(dtest)
+    pred = model.predict(test_features)
 
     # Define a new dataframe to hold the results.
     model_results = pd.DataFrame(index = range(len(test_features.index)), columns = [get_col_names(feature) for feature in features] + ['prediction', 'truth'])
