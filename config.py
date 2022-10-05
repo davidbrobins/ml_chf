@@ -36,8 +36,8 @@ def read_config_file(model_dir):
     config_entries['target'] = 'log10(' + config['IO']['output'] + '_Z_' + config['IO']['Z'] + ') [erg cm^{3} s^{-1}]'
     # Get string of target type (CF or HF) to read from training data
     config_entries['output'] = config['IO']['output']
-    # Get integer value of metallicity to read from training data
-    config_entries['metallicity'] = int(config['IO']['Z'])
+    # Get value of metallicity to read from training data (should be one of 0, 0.1, 0.3, 1, 3)
+    config_entries['metallicity'] = config['IO']['Z']
     # Get list of alpha values to read in from training data
     if 'alpha' in config['IO']: # Check if value of alpha is specified
         # If so, get its value
