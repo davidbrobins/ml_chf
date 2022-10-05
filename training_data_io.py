@@ -47,7 +47,7 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
         # Now scale each photoionization rate except P_LW by P_LW and take log10
         # (first two entries of prate_cols are NOT photoionization rates)
         for col in prate_cols[3:]:
-            merged[col] = np.log10(merged[col] - merged['log10(P_LW) [x^{-1}']) # Take difference (note that P_LW has not yet been scaled by radiation field amplitude, or had log10 taken
+            merged[col] = np.log10(merged[col]) - np.log10(merged['log10(P_LW) [s^{-1}]']) # Take difference (note that P_LW has not yet been scaled by radiation field amplitude, or had log10 taken
         # Scale P_LW by radiation field amplitude and take log10
         merged['log10(P_LW) [s^{-1}]'] = np.log10(merged['log10(P_LW) [s^{-1}]']) + merged['log10(J_0/n_b/J_{MW})']
         
