@@ -53,7 +53,7 @@ def do_bayes_search(gs_features, gs_labels, grid_search_params, model_dir):
     bayes_search.fit(gs_features, gs_labels)
 
     # Print how long it took
-    print('Time for grid search: ', time.time()-start)
+    print('Time for Bayes search: ', time.time()-start)
 
     # Get best parameters
     best_params = bayes_search.best_params_

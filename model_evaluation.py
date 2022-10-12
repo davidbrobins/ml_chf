@@ -10,6 +10,8 @@ import numpy as np
 from column_definition import *
 # From pickle import read
 from pickle import load
+# From pickle import saving
+from pickle import dump
 
 def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf, model_dir, opt_type):
     '''
@@ -30,6 +32,10 @@ def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf
     # Get model predictions
     pred = model.predict(test_features)
 
+    # Save features, truth on test data for computing Shapley values
+    dump(test_features, open(model_dir + '/test_features.pkl', 'wb'))
+    dump(test_labels, open(model_dir + '/test_labels.pkl', 'wb'))
+    
     # Define a new dataframe to hold the results.
     model_results = pd.DataFrame(index = range(len(test_features.index)), columns = [get_col_names(feature) for feature in features] + ['prediction', 'truth'])
 
