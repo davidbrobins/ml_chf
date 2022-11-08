@@ -1,7 +1,7 @@
 # Module containing dictionary, dictionary mapping to go between feature names in config files, columns from data tables
 
 # Set up a dictionary containing the data column names as keys, corresponding feature names as values
-feat_to_col = {'t_feat': 'log10(T) [K]', 'n_b_feat': 'log10(n_b) [cm^{-3}]', 'p_lw_feat': 'log10(P_LW) [s^{-1}]',
+feat_to_col = {'t_feat': 'log10(T) [K]', 'n_b_feat': 'log10(n_b) [cm^{-3}]', 'z_feat': 'log10(Z/Z_sun)', 'p_lw_feat': 'log10(P_LW) [s^{-1}]',
                'p_hi_feat': 'log10(P_HI/P_LW)', 'p_hei_feat': 'log10(P_HeI/P_LW)', 'p_heii_feat': 'log10(P_HeII/P_LW)', 
                'p_cvi_feat': 'log10(P_CVI/P_LW)', 'p_al13_feat': 'log10(P_Al13/P_LW)', 'p_fe26_feat': 'log10(P_Fe26/P_LW)', 
                'p_ci_feat': 'log10(P_CI/P_LW)', 'p_c04_feat': 'log10(P_C04/P_LW)', 'p_c05_feat': 'log10(P_C05/P_LW)', 

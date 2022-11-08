@@ -3,7 +3,19 @@
 import pandas as pd # Pandas for dataframe handling
 import numpy as np # Numpy for math
 
-def get_training_data(data_path, alpha_vals, target, output, metallicity, restricted_params):
+def series_to_list(series):
+    '''
+    Helper function to convert a Pandas series to a python list
+    Input:
+    series (pandas.Series): Series to convert to a list.
+    Output:
+    list (list): The converted list.
+    '''
+
+    # Do the conversion, return the result
+    return list(series.values)
+
+def get_training_data(data_path, alpha_vals, target, output, restricted_params):
     '''
     Function to read in the needed susbset of training data, given relevant parameters from the config file.
     Input:
@@ -11,7 +23,6 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
     alpha_vals (list): Values of alpha parameter to include.
     target (str): The name of the target column
     output (str): Which of CF or HF is to be predicted.
-    metallicity (int): Value of metallicity (0, 1, or 2 times solar) at which output is evaluated to get target.
     restricted_params (dict): Columns of training data to be restricted to a single value, and those values.
     Output:
     data_df (dataframe): The desired subset of the training data.
@@ -39,9 +50,6 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
         chf = pd.read_csv(data_path + '/raw_data/raw_'+str(alpha)+'.res', sep='\s+',
                           usecols = [0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20], names = chf_cols)
         
-        # Calculate target
-        chf[target] = (chf[output + '_Z_'+str(metallicity)]).transform(np.log10) # Take log, get value at right metallicity
-        
         # Merge the two dataframes on the matching columns (fq, tau0)
         merged = chf.merge(p_rates, on = ['log10(f_q)', 'log10(tau_0)'])
         # Now scale each photoionization rate except P_LW by P_LW and take log10
@@ -65,5 +73,28 @@ def get_training_data(data_path, alpha_vals, target, output, metallicity, restri
 
     # Merge dataframes for all the alpha values
     data_df = pd.concat([alpha_dfs[alpha] for alpha in alpha_vals])
+
+    # Create a column which contains the 5 values of log(Z/Z_sun) used
+    # Note: the Z=0 columns are really calculated as Z/Z_sun = 1e-4
+    data_df['log10(Z/Z_sun)'] = pd.Series([np.log10([1e-4, 0.1, 0.3, 1, 3]) for x in range(len(data_df.index))])
+    # Create columns containing arrays (aligned with the log10(Z/Z_sun) array) of log10(CF), log10(HF)
+    # To get these, apply series -> list helper function on CF/HF(Z) columns in each row
+    data_df['log10(CF) [erg cm^{3} s^{-1}]'] = np.log10(data_df[['CF_Z_0', 'CF_Z_0.1', 'CF_Z_0.3', 'CF_Z_1', 'CF_Z_3']]).apply(series_to_list, axis = 1)
+    data_df['log10(HF) [erg cm^{3} s^{-1}]'] = np.log10(data_df[['HF_Z_0', 'HF_Z_0.1', 'HF_Z_0.3', 'HF_Z_1', 'HF_Z_3']]).apply(series_to_list, axis = 1)
+    # Now, expand these 3 aligned lists, with all 5 elements getting their own row (and only take the columns we'll need later)
+    data_df = data_df[['log10(n_b) [cm^{-3}]', 'log10(T) [K]', 'log10(J_0/n_b/J_{MW})', 'log10(f_q)', 'log10(tau_0)','alpha',
+                       'log10(P_LW) [s^{-1}]', 'log10(P_HI/P_LW)', 'log10(P_HeI/P_LW)', 'log10(P_HeII/P_LW)', 'log10(P_CVI/P_LW)',
+                       'log10(P_Al13/P_LW)', 'log10(P_Fe26/P_LW)', 'log10(P_CI/P_LW)', 'log10(P_C04/P_LW)', 'log10(P_C05/P_LW)', 
+                       'log10(P_O06/P_LW)', 'log10(P_O08/P_LW)', 'log10(P_F09/P_LW)', 'log10(P_Ne10/P_LW)', 'log10(P_Na11/P_LW)',
+                       'log10(P_Mg12/P_LW)', 'log10(P_Si14/P_LW)', 'log10(P_S16/P_LW)', 'log10(P_Ar18/P_LW)', 'log10(P_Ca20/P_LW)',
+                       'log10(Z/Z_sun)', 'log10(CF) [erg cm^{3} s^{-1}]',
+                       'log10(HF) [erg cm^{3} s^{-1}]']].explode(['log10(Z/Z_sun)', 'log10(CF) [erg cm^{3} s^{-1}]', 'log10(HF) [erg cm^{3} s^{-1}]'], ignore_index = True)
+    # Convert the expanded columns to float (rather than 'object' datatype), needed for XGBoost to handle the data table
+    data_df['log10(Z/Z_sun)'] = data_df['log10(Z/Z_sun)'].astype(float)
+    data_df['log10(CF) [erg cm^{3} s^{-1}]'] = data_df['log10(CF) [erg cm^{3} s^{-1}]'].astype(float)
+    data_df['log10(HF) [erg cm^{3} s^{-1}]'] = data_df['log10(HF) [erg cm^{3} s^{-1}]'].astype(float)
+
+    # Make the target column
+    data_df['target'] = data_df[target]
     
     return data_df

@@ -13,11 +13,10 @@ from pickle import load
 # From pickle import saving
 from pickle import dump
 
-def evaluate_model(dtest, test_features, test_labels, model, features, scale_chf, model_dir, opt_type):
+def evaluate_model(test_features, test_labels, model, features, scale_chf, model_dir, opt_type):
     '''
     Function to run model predictions on test data.
     Input:
-    dtest (DMatrix): Test data features and labels packaged for XGBoost.
     test_features (dataframe): The test data features.
     test_labels (dataframe): The test data labels (truth).
     model (XGBoost model): The trained XGBoost model.

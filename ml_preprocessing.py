@@ -17,12 +17,10 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed):
     random_seed (int): Seed to make train-test split reproducible.
     Output:
     split_data (dict): A dictionary containing:
-    -dtrain (DMatrix): DMatrix containing the features, labels for training data.
     -train_features (dataframe): Dataframe containing the features for training data.
     -train_labels (dataframe): Dataframe containing the labels for training data.
     -gs_features (dataframe): Dataframe containing the features for grid search data.
     -gs_labels (dataframe): Dataframe containing the labels for grid search data.
-    -dtest (DMatrix): DMatrix containing the features, labels for test data.
     -test_features (dataframe): Dataframe containing the features for test data.
     -test_labels (dataframe): Dataframe containing the labels for test data.
     '''
@@ -40,14 +38,10 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed):
     train_features, gs_features, train_labels, gs_labels = train_test_split(train_features, train_labels,
                                                                             test_size = 0.1,
                                                                             random_state = random_seed + 1)
-    
-    # Convert the features, labels for train, test sets to XGBoost DMatrix datatype
-    dtrain = xgb.DMatrix(train_features, train_labels)
-    dtest = xgb.DMatrix(test_features, test_labels)
 
     # Package these all in a dictionary
-    split_data = {'dtrain' : dtrain, 'train_features' : train_features, 'train_labels' : train_labels,
+    split_data = {'train_features' : train_features, 'train_labels' : train_labels,
                   'gs_features' : gs_features, 'gs_labels' : gs_labels,
-                  'dtest' : dtest, 'test_features' : test_features, 'test_labels' : test_labels}
+                  'test_features' : test_features, 'test_labels' : test_labels}
     # Return the packaged dictionary
     return split_data

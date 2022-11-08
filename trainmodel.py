@@ -27,7 +27,7 @@ config_entries = config.read_config_file(model_dir)
 # Read in data
 data_df = training_data_io.get_training_data(config_entries['data_path'], config_entries['alpha_vals'],
                                              config_entries['target'], config_entries['output'],
-                                             config_entries['metallicity'], config_entries['restricted_params'])
+                                             config_entries['restricted_params'])
 
 # Apply feature and target scaling
 data_df = data_scaling.rescale(config_entries['features'], config_entries['target'], config_entries['scale_chf'], data_df, model_dir)
@@ -40,7 +40,7 @@ split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['fe
 model = model_training.train_model(split_data['train_features'], split_data['train_labels'], model_dir, opt_type)
 
 # Evaluate the model on test data
-model_results = model_evaluation.evaluate_model(split_data['dtest'], split_data['test_features'],
+model_results = model_evaluation.evaluate_model(split_data['test_features'],
                                                 split_data['test_labels'], model,
                                                 config_entries['features'], config_entries['scale_chf'],
                                                 model_dir, opt_type)

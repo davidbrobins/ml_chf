@@ -12,8 +12,7 @@ def read_config_file(model_dir):
     config_entries (dict): A dictionary containing:
     -data_path (str): Path to directory containing the training data.
     -target (str): String labelling the target for XGBoost to predict.                                                                                               
-    -output (str): String specifying whether to read in CF or HF from data table.                                                                      
-    -metallicity (int): Integer value of metallicity (0, 1, or 2) at which to read in output from the data table.                                               
+    -output (str): String specifying whether to read in CF or HF from data table.                                                                                                         
     -alpha_vals (list): List of values of alpha parameter (which indexes training data) to use in training.
     -restricted_params (dict): Dictionary containing training data parameters restricted to one value, and those values.
     -random_seed (int): Random seed (for reproducibility)
@@ -33,11 +32,9 @@ def read_config_file(model_dir):
     # Get the path to the training data
     config_entries['data_path'] = config['IO']['training_data_path']
     # Get string to label target column with
-    config_entries['target'] = 'log10(' + config['IO']['output'] + '_Z_' + config['IO']['Z'] + ') [erg cm^{3} s^{-1}]'
+    config_entries['target'] = 'log10(' + config['IO']['output'] + ') [erg cm^{3} s^{-1}]'
     # Get string of target type (CF or HF) to read from training data
     config_entries['output'] = config['IO']['output']
-    # Get value of metallicity to read from training data (should be one of 0, 0.1, 0.3, 1, 3)
-    config_entries['metallicity'] = config['IO']['Z']
     # Get list of alpha values to read in from training data
     if 'alpha' in config['IO']: # Check if value of alpha is specified
         # If so, get its value
