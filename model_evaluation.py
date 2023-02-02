@@ -13,7 +13,7 @@ from pickle import load
 # From pickle import saving
 from pickle import dump
 
-def evaluate_model(test_features, test_labels, model, features, scale_chf, model_dir, opt_type):
+def evaluate_model(test_features, test_labels, model, features, model_dir):
     '''
     Function to run model predictions on test data.
     Input:
@@ -21,9 +21,7 @@ def evaluate_model(test_features, test_labels, model, features, scale_chf, model
     test_labels (dataframe): The test data labels (truth).
     model (XGBoost model): The trained XGBoost model.
     features (list): List of feature names.
-    scale_chf (bool): Flag giving whether or not target is scaled to 0-1.
     model_dir (str): The path to the directory containing the appropriate config file (to save the results and read scalers).
-    opt_type (str): Two-letter code for the method used to find hyperparameters (currently: 'gs' for grid search, 'sp' for scipy optimization, 'bs' for Bayes search).
     Output:
     model_results (dataframe): Unscaled features, target values (also saved).
     '''
@@ -47,20 +45,13 @@ def evaluate_model(test_features, test_labels, model, features, scale_chf, model
         scaler = scalers[feature]
         # Unscale the feature
         model_results[get_col_names(feature)] = scaler.inverse_transform(test_features[feature].values.reshape(-1,1))
-    # Check if target is scaled                                                                                                                                                                          
-    if scale_chf == True:
-        # Unscale the model prediction
-        target_scaler = scalers['target'] # Get scaler
-        model_results['prediction'] = target_scaler.inverse_transform(pred.reshape(-1,1))
-        # Unscale the true labels
-        model_results['truth'] = target_scaler.inverse_transform(test_labels['target'].values.reshape(-1,1))
-    # Otherwise, no need to unscale predictions or true values.
-    else:
-        model_results['prediction'] = pred # Predictions are just the prediction (no unscaling required)
-        model_results['truth'] = test_labels['target'].values # True values are just the test labels (no unscaling required)
+
+    # Save the model predicted and true CHF values
+    model_results['prediction'] = pred # Predictions are just the prediction (no unscaling required)
+    model_results['truth'] = test_labels['target'].values # True values are just the test labels (no unscaling required)
     
     # Save the model results
-    model_results.to_pickle(model_dir + '/' + opt_type + '_model_results.pkl')
+    model_results.to_pickle(model_dir + '/model_results.pkl')
 
     return model_results
 

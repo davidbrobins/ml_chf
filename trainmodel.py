@@ -15,7 +15,7 @@ import data_scaling
 import ml_preprocessing
 # Module to train model
 import model_training
-# Moduel to evaluate model
+# Module to evaluate model
 import model_evaluation
 
 # Unpack command line arguments (this file, path to config file directory, two-letter code for the method used to find best model hyperparameters)
@@ -44,5 +44,4 @@ model_results = model_evaluation.evaluate_model(split_data['test_features'],
                                                 split_data['test_labels'], model,
                                                 config_entries['features'], config_entries['scale_chf'],
                                                 model_dir, opt_type)
-
 

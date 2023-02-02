@@ -1,5 +1,5 @@
-# Python script to run hyperparameter grid search from a model directory with a config file
-# Syntax to run: python rungrid.py configdir/
+# Python script to run hyperparameter Bayesian optimization search from a model directory with a config file
+# Syntax to run: python runbayes.py configdir/
 # (/ not needed)
 
 # Imports:
@@ -13,8 +13,8 @@ import training_data_io
 import data_scaling
 # Module to package features/target for ML model, do train-test split
 import ml_preprocessing
-# Module to implement hyperparameter grid search
-import grid_search_tools
+# Module to implement hyperparameter Bayesian search
+import hp_val_tools
 
 # Unpack command line arguments (this file, path to config file directory)
 (pyfilename, model_dir) = sys.argv
@@ -35,7 +35,8 @@ split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['fe
                                                      config_entries['train_frac'], config_entries['random_seed'])
 
 # Do grid search
-best_params = grid_search_tools.do_grid_search(split_data['gs_features'], split_data['gs_labels'],
-                                               config_entries['grid_search_params'], model_dir)
+best_params = bayes_search_tools.do_bayes_search(split_data['gs_features'], split_data['gs_labels'],
+                                                 config_entries['grid_search_params'], model_dir)
 # Display the optimal hyperparameters from the grid search
 print('Best parameters from grid search: \n', best_params)
+
