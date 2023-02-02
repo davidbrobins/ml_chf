@@ -31,34 +31,12 @@ def rescale_feature(feature_name, data_df, scaler_type = preprocessing.MinMaxSca
     # Return the updated dataframe
     return data_df, scaler
 
-def rescale_target(target_name, data_df, scaler_type = preprocessing.MinMaxScaler()):
+def rescale(features, target, data_df, model_dir, scaler_type = preprocessing.MinMaxScaler()):
     '''
-    Function to create, train, and save a data scaler for a given target.
-    Input:
-    target_name (str): Name of target column to be rescaled.
-    data_df (dataframe): The training data on which to train the scaler.
-    scaler_type (scaler): Type of scaler to apply (defaults ot MinMaxScaler())  
-    Output:
-    data_df (dataframe): The training data, with new column containing the rescaled target.
-    scaler: The trained scaler.
-    '''
-
-    # Fit the scaler
-    scaler = scaler_type.fit(data_df[target_name].values.reshape(-1,1))
-    # Apply the scaler
-    data_df['target'] = scaler.transform(data_df[target_name].values.reshape(-1,1))
-    
-    # Return the updated dataframe
-    return data_df, scaler
-
-
-def rescale(features, target, scale_chf, data_df, model_dir, scaler_type = preprocessing.MinMaxScaler()):
-    '''
-    Function to create, train, and save data scalers for all given features, target.
+    Function to create, train, and save data scalers for all given features.
     Input:
     features (list of str): Names of all features to rescale.
-    target (str): Name of target to rescale.
-    scale_chf (bool): Flag giving whether or not to scale target.
+    target (str): Name of target.
     data_df (dataframe): The training data on which to train the scalers.
     model_dir (str): Path to the directory containing the relevant config file (saved scalers will be placed there).
     Output:
@@ -74,15 +52,8 @@ def rescale(features, target, scale_chf, data_df, model_dir, scaler_type = prepr
         data_df, scaler = rescale_feature(feature, data_df, scaler_type = scaler_type)
         # Put the feature scaler into a dictionary
         scalers[feature] = deepcopy(scaler)
-    # Check whether or not to scale target
-    if scale_chf == True:
-        # Rescale the target
-        data_df, target_scaler = rescale_target(target, data_df, scaler_type = scaler_type)
-        # Put the target scaler into a dictionary
-        scalers['target'] = deepcopy(target_scaler)
-    # Otherwise, no need to scale the target.  Just set 'target' column to the target
-    else:
-        data_df['target'] = data_df[target]
+    # No need to scale the target.  Just set 'target' column to the target
+    data_df['target'] = data_df[target]
     
     # Save the scalers
     dump(scalers, open(model_dir + '/scalers.pkl', 'wb'))

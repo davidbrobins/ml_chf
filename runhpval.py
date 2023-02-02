@@ -23,20 +23,19 @@ import hp_val_tools
 config_entries = config.read_config_file(model_dir)
 
 # Read in data
-data_df = training_data_io.get_training_data(config_entries['data_path'], config_entries['alpha_vals'],
-                                             config_entries['target'], config_entries['output'],
-                                             config_entries['restricted_params'])
+data_df = training_data_io.get_training_data(config_entries['data_path'], config_entries['target'], config_entries['output'],
+                                             config_entries['Z_vals'])
 
 # Apply feature and target scaling
-data_df = data_scaling.rescale(config_entries['features'], config_entries['target'], config_entries['scale_chf'], data_df, model_dir)
+data_df = data_scaling.rescale(config_entries['features'], config_entries['target'], data_df, model_dir)
 
 # Do train-test split to get grid search data
 split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['features'],
                                                      config_entries['train_frac'], config_entries['random_seed'])
 
 # Do grid search
-best_params = bayes_search_tools.do_bayes_search(split_data['gs_features'], split_data['gs_labels'],
-                                                 config_entries['grid_search_params'], model_dir)
+best_params = hp_val_tools.do_bayes_search(split_data['hp_val_features'], split_data['hp_val_labels'], model_dir)
+
 # Display the optimal hyperparameters from the grid search
 print('Best parameters from grid search: \n', best_params)
 
