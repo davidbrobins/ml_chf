@@ -1,4 +1,4 @@
-# Python script to train model on training data using optimized hyperparameter, then evaluate it on test set.
+# Python script to train model on training data using optimized hyperparameters, then evaluate it on test set.
 # Syntax to run: python trainmodel.py configdir/ 
 # (/ not needed)
 
@@ -13,6 +13,8 @@ import training_data_io
 import data_scaling
 # Module to package features/target for ML model, do train-test split
 import ml_preprocessing
+# Module to perform hyperparameter optimization (via Bayesian search)
+import hp_val_tools
 # Module to train model
 import model_training
 # Module to evaluate model
@@ -35,6 +37,14 @@ data_df = data_scaling.rescale(config_entries['features'], config_entries['targe
 split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['features'],
                                                      config_entries['train_frac'], config_entries['random_seed'])
 
+# Check whether to perform hyperparameter validation or not:
+if config_enteries['do_hp_val'] == True:
+    # If so, do hyperparameter optimization
+    best_params = hp_val_tools.do_bayes_search(split_data['hp_val_features'], split_data['hp_val_labels'], model_dir)
+    # Print the optimal hyperparameters found
+    print('Best hyperparameters found: \n', best_params)
+# Otherwise, existing file of best hyperparameters will be used to train the model
+    
 # Train the model
 model = model_training.train_model(split_data['train_features'], split_data['train_labels'], model_dir)
 
