@@ -41,10 +41,17 @@ def read_config_file(model_dir):
     # Get string of target type (CF or HF) to read from training data
     config_entries['output'] = config['IO']['output']
     # Check if Z value is specified in config file
-    if 'Z/Z_sun' in config['IO']: # If so, set 'Z_vals' entry to that value (scaled to solar metallicity)
-        config_entries['Z_vals'] = [config['IO']['Z/Z_sun']]
+    if 'Z/Z_sun' in config['IO']:
+        # If so, get the Z/Z_sun value
+        Z = float(config['IO']['Z/Z_sun'])
+        # Now check if it's equal to any of the allowed Z values
+        for allowed_Z in [0, 0.1, 0.3, 1, 3]: 
+            if Z == allowed_Z:
+                # If so, only read in that fixed Z value
+                config_entries['Z_vals'] = [allowed_Z]
     else: # If not, read in all Z values in the training data table
         config_entries['Z_vals'] = [0, 0.1, 0.3, 1, 3]
+        
     # Get random seed as an integer
     config_entries['random_seed'] = int(config['ml_data_prep']['random_seed'])
     # Get fraction of input data table to use for model training (rest for grid search validation).
@@ -53,10 +60,11 @@ def read_config_file(model_dir):
     config_entries['do_hp_val'] = config['ml_data_prep'].getboolean('do_hp_val')
     # If this flag is set to False, make sure there's a corresponding optimized hyperparameters file
     # If not, throw a warning
-    if not os.path.exists(model_dir + '/hp_val_best_params.pkl'):
-        # If not, issue a warning                                                                                                                               
-        warnings.warn('No optimized hyperparameters found in model directors. Please run hyperparameter optimization'
-                      + ' (rungrid.py or runsciopt.py) before training model.')
+    if config_entries['do_hp_val'] == False:
+        if not os.path.exists(model_dir + '/hp_val_best_params.pkl'):
+            # If not, issue a warning
+            warnings.warn('No optimized hyperparameters found in model directors. Please run hyperparameter optimization'
+                          + ' (rungrid.py or runsciopt.py) before training model.')
     
     # Get list of features for the XGBoost model
     config_entries['features'] = [key + '_feat' for key in config['features']]

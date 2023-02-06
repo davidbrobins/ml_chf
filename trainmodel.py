@@ -35,10 +35,11 @@ data_df = data_scaling.rescale(config_entries['features'], config_entries['targe
 
 # Do train-test split to get grid search data
 split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['features'],
-                                                     config_entries['train_frac'], config_entries['random_seed'])
+                                                     config_entries['train_frac'], config_entries['random_seed'],
+                                                     config_entries['do_hp_val'])
 
 # Check whether to perform hyperparameter validation or not:
-if config_enteries['do_hp_val'] == True:
+if config_entries['do_hp_val'] == True:
     # If so, do hyperparameter optimization
     best_params = hp_val_tools.do_bayes_search(split_data['hp_val_features'], split_data['hp_val_labels'], model_dir)
     # Print the optimal hyperparameters found

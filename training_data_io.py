@@ -36,27 +36,29 @@ def get_training_data(data_path, target, output, Z_vals):
                   'log10(Q_Ca20/Q_LW)']
     # Additional photoionization rate column names
     prate_MgFe_cols = ['log10(f_q)', 'log10(tau_0)', 'log10(Q_LW) [cm^3 s^{-1}]', 'log10(Q_MgI/Q_LW)', 'log10(Q_MgII/Q_LW)', 
-                   'log10(Q_MgIII/Q_LW)', 'log10(Q_MgIV/Q_LW)', 'log10(Q_MgV/Q_LW)', 'log10(Q_MgVI/Q_LW)', 
-                   'log10(Q_MgVII/Q_LW)', 'log10(Q_MgVIII/Q_LW)', 'log10(Q_MgIX/Q_LW)', 'log10(Q_MgX/Q_LW)', 
-                   'log10(Q_MgXI/Q_LW)', 'log10(Q_MgXII/Q_LW)', 'log10(Q_FeI/Q_LW)', 'log10(Q_FeII/Q_LW)', 
-                   'log10(Q_FeIII/Q_LW)', 'log10(Q_FeIV/Q_LW)', 'log10(Q_FeV/Q_LW)', 'log10(Q_FeVI/Q_LW)', 
-                   'log10(Q_FeVII/Q_LW)', 'log10(Q_FeVIII/Q_LW)', 'log10(Q_FeIX/Q_LW)', 'log10(Q_FeX/Q_LW)', 
-                   'log10(Q_FeXI/Q_LW)', 'log10(Q_FeXII/Q_LW)', 'log10(Q_FeXIII/Q_LW)', 'log10(Q_FeXIV/Q_LW)',
-                   'log10(Q_FeXV/Q_LW)', 'log10(Q_FeXVI/Q_LW)', 'log10(Q_FeXVII/Q_LW)', 'log10(Q_FeXVIII/Q_LW)', 
-                   'log10(Q_FeXIX/Q_LW)', 'log10(Q_FeXX/Q_LW)', 'log10(Q_FeXXI/Q_LW)', 'log10(Q_FeXXII/Q_LW)', 
-                   'log10(Q_FeXXIII/Q_LW)', 'log10(Q_FeXXIV/Q_LW)', 'log10(Q_FeXXV/Q_LW)', 'log10(Q_FeXXVI/Q_LW)']
+                       'log10(Q_MgIII/Q_LW)', 'log10(Q_MgIV/Q_LW)', 'log10(Q_MgV/Q_LW)', 'log10(Q_MgVI/Q_LW)', 
+                       'log10(Q_MgVII/Q_LW)', 'log10(Q_MgVIII/Q_LW)', 'log10(Q_MgIX/Q_LW)', 'log10(Q_MgX/Q_LW)', 
+                       'log10(Q_MgXI/Q_LW)', 'log10(Q_MgXII/Q_LW)', 'log10(Q_FeI/Q_LW)', 'log10(Q_FeII/Q_LW)', 
+                       'log10(Q_FeIII/Q_LW)', 'log10(Q_FeIV/Q_LW)', 'log10(Q_FeV/Q_LW)', 'log10(Q_FeVI/Q_LW)', 
+                       'log10(Q_FeVII/Q_LW)', 'log10(Q_FeVIII/Q_LW)', 'log10(Q_FeIX/Q_LW)', 'log10(Q_FeX/Q_LW)', 
+                       'log10(Q_FeXI/Q_LW)', 'log10(Q_FeXII/Q_LW)', 'log10(Q_FeXIII/Q_LW)', 'log10(Q_FeXIV/Q_LW)',
+                       'log10(Q_FeXV/Q_LW)', 'log10(Q_FeXVI/Q_LW)', 'log10(Q_FeXVII/Q_LW)', 'log10(Q_FeXVIII/Q_LW)', 
+                       'log10(Q_FeXIX/Q_LW)', 'log10(Q_FeXX/Q_LW)', 'log10(Q_FeXXI/Q_LW)', 'log10(Q_FeXXII/Q_LW)', 
+                       'log10(Q_FeXXIII/Q_LW)', 'log10(Q_FeXXIV/Q_LW)', 'log10(Q_FeXXV/Q_LW)', 'log10(Q_FeXXVI/Q_LW)']
     # CHF data column names
-    chf_cols = ['log10(n_b) [cm^{-3}]', 'log10(T) [K]', 'log10(J_0/n_b/J_{MW})', 
+    chf_cols = ['log10(n_H) [cm^{-3}]', 'log10(T) [K]', 'log10(J_0/n_b/J_{MW})', 
                 'log10(f_q)', 'log10(tau_0)', 'CF_Z_0','CF_Z_0.1', 'CF_Z_0.3', 'CF_Z_1', 'CF_Z_3',
                 'HF_Z_0', 'HF_Z_0.1', 'HF_Z_0.3', 'HF_Z_1', 'HF_Z_3'] 
     # Create a blank dataframe to store the dataframes for each alpha
     alpha_dfs = {}
+    # Define list of alpha values to loop through
+    alpha_vals = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
     
     # Loop through alpha values
     for alpha in alpha_vals:
         # Read in photoionization rate data at this alpha value
         p_rates = pd.read_csv(data_path + '/p_rate_data/prates_'+str(alpha)+'.dat', sep= '\s+', names = prate_cols)
-        p_rates_MgFe = pd.read_csv(data_path + '/p_rate_data/pratesMgFe_' + str(alpha) + '.dat', sep = '\s+', names = prates_MgFe_cols)
+        p_rates_MgFe = pd.read_csv(data_path + '/p_rate_data/pratesMgFe_' + str(alpha) + '.dat', sep = '\s+', names = prate_MgFe_cols)
         # Merge these two dataframes on the matching columns
         p_rates_all = p_rates.merge(p_rates_MgFe, on = ['log10(f_q)', 'log10(tau_0)', 'log10(Q_LW) [cm^3 s^{-1}]'])
         
@@ -72,7 +74,7 @@ def get_training_data(data_path, target, output, Z_vals):
         for col in prate_MgFe_cols[3:]:
             merged[col] = np.log10(merged[col]) - np.log10(merged['log10(Q_LW) [cm^3 s^{-1}]'])
         # Scale Q_LW by radiation field amplitude J_0 and take log10
-        merged['log10(Q_LW) [cm^3 s^{-1}]'] = np.log10(merged['log10(P_LW) [cm^3 s^{-1}]']) + merged['log10(J_0/n_b/J_{MW})']
+        merged['log10(Q_LW) [cm^3 s^{-1}]'] = np.log10(merged['log10(Q_LW) [cm^3 s^{-1}]']) + merged['log10(J_0/n_b/J_{MW})']
         
         # Add a column with the alpha value
         merged['alpha'] = alpha
@@ -82,37 +84,48 @@ def get_training_data(data_path, target, output, Z_vals):
 
     # Merge dataframes for all the alpha values
     data_df = pd.concat([alpha_dfs[alpha] for alpha in alpha_vals])
-
-    # Create columns containing arrays of log10(CF), log10(HF) at Z/Z_sun values in Z_vals
-    # To get these, apply series -> list helper function on CF/HF(Z) columns in each row
-    data_df['log10(CF) [erg cm^{3} s^{-1}]'] = np.log10(data_df[['CF_Z_' + str(val) for val in Z_vals]]).apply(series_to_list, axis = 1)
-    data_df['log10(HF) [erg cm^{3} s^{-1}]'] = np.log10(data_df[['HF_Z_' + str(val) for val in Z_vals]]).apply(series_to_list, axis = 1)
-    # Before taking log of Z values, convert Z/Z_sun = 0 to 1e-4 (the real values
-    for index in range(len(Z_vals)):
-        if Z_vals[index] == 0:
-            Z_vals[index] = 1e-4
-    # Create a column which contains the values of log(Z/Z_sun) used                                                                                  
-    # Note: the Z=0 columns are really calculated as Z/Z_sun = 1e-4                                                                                   
-    data_df['log10(Z/Z_sun)'] = pd.Series([np.log10(Z_vals) for x in range(len(data_df.index))])
-    # Now, expand these 3 aligned lists, with all elements getting their own row (and only take the columns we'll need later)
-    data_df = data_df[['log10(n_H) [cm^{-3}]', 'log10(T) [K]', 'log10(Q_LW) [cm^3 s^{-1}]', 'log10(Q_HI/Q_LW)', 'log10(Q_HeI/Q_LW)',
-                       'log10(Q_HeII/Q_LW)', 'log10(Q_CVI/Q_LW)', 'log10(Q_Al13/Q_LW)', 'log10(Q_CI/Q_LW)', 'log10(Q_C04/Q_LW)',
-                       'log10(Q_C05/Q_LW)', 'log10(Q_O06/Q_LW)', 'log10(Q_O08/Q_LW)', 'log10(Q_F09/Q_LW)', 'log10(Q_Ne10/Q_LW)',
-                       'log10(Q_Na11/Q_LW)', 'log10(Q_Si14/Q_LW)', 'log10(Q_S16/Q_LW)', 'log10(Q_Ar18/Q_LW)', 'log10(Q_Ca20/Q_LW)',
-                       'log10(Q_MgI/Q_LW)', 'log10(Q_MgII/Q_LW)', 'log10(Q_MgIII/Q_LW)', 'log10(Q_MgIV/Q_LW)', 'log10(Q_MgV/Q_LW)',
-                       'log10(Q_MgVI/Q_LW)', 'log10(Q_MgVII/Q_LW)', 'log10(Q_MgVIII/Q_LW)', 'log10(Q_MgIX/Q_LW)', 'log10(Q_MgX/Q_LW)',
-                       'log10(Q_MgXI/Q_LW)', 'log10(Q_MgXII/Q_LW)', 'log10(Q_FeI/Q_LW)', 'log10(Q_FeII/Q_LW)', 'log10(Q_FeIII/Q_LW)',
-                       'log10(Q_FeIV/Q_LW)', 'log10(Q_FeV/Q_LW)', 'log10(Q_FeVI/Q_LW)', 'log10(Q_FeVII/Q_LW)', 'log10(Q_FeVIII/Q_LW)',
-                       'log10(Q_FeIX/Q_LW)', 'log10(Q_FeX/Q_LW)', 'log10(Q_FeXI/Q_LW)', 'log10(Q_FeXII/Q_LW)', 'log10(Q_FeXIII/Q_LW)',
-                       'log10(Q_FeXIV/Q_LW)', 'log10(Q_FeXV/Q_LW)', 'log10(Q_FeXVI/Q_LW)', 'log10(Q_FeXVII/Q_LW)', 'log10(Q_FeXVIII/Q_LW)',
-                       'log10(Q_FeXIX/Q_LW)', 'log10(Q_FeXX/Q_LW)', 'log10(Q_FeXXI/Q_LW)', 'log10(Q_FeXXII/Q_LW)', 'log10(Q_FeXXIII/Q_LW)',
-                       'log10(Q_FeXXIV/Q_LW)', 'log10(Q_FeXXV/Q_LW)', 'log10(Q_FeXXVI/Q_LW)', 
-                       'log10(Z/Z_sun)', 'log10(CF) [erg cm^{3} s^{-1}]', 'log10(HF) [erg cm^{3} s^{-1}]'
-                       ]].explode(['log10(Z/Z_sun)', 'log10(CF) [erg cm^{3} s^{-1}]', 'log10(HF) [erg cm^{3} s^{-1}]'], ignore_index = True)
-    # Convert the expanded columns to float (rather than 'object' datatype), needed for XGBoost to handle the data table
-    data_df['log10(Z/Z_sun)'] = data_df['log10(Z/Z_sun)'].astype(float)
-    data_df['log10(CF) [erg cm^{3} s^{-1}]'] = data_df['log10(CF) [erg cm^{3} s^{-1}]'].astype(float)
-    data_df['log10(HF) [erg cm^{3} s^{-1}]'] = data_df['log10(HF) [erg cm^{3} s^{-1}]'].astype(float)
+                                                                                  
+    # If only one Z value
+    if len(Z_vals) == 1:
+        # Get Z value
+        Z = Z_vals[0]
+        # Create columns containing log10(CF), log10(HF) at Z/Z_sun value
+        data_df['log10(CF) [erg cm^{3} s^{-1}]'] = np.log10(data_df['CF_Z_' + str(Z)])
+        data_df['log10(HF) [erg cm^{3} s^{-1}]'] = np.log10(data_df['HF_Z_' + str(Z)])
+        # If Z=0, convert to real value of 1e-4
+        if Z == 0:
+            Z = 1e-4
+        # Make column with the fixed Z/Z_sun value
+        data_df['log10(Z/Z_sun)'] = np.log10(Z)
+    # Otherwise, there are multiple Z values
+    else:
+        # Create columns containing arrays of log10(CF), log10(HF) at Z/Z_sun values in Z_vals                                                        
+        # To get these, apply series -> list helper function on CF/HF(Z) columns in each row
+        data_df['log10(CF) [erg cm^{3} s^{-1}]'] = np.log10(data_df[['CF_Z_' + str(val) for val in Z_vals]]).apply(series_to_list, axis = 1)
+        data_df['log10(HF) [erg cm^{3} s^{-1}]'] = np.log10(data_df[['HF_Z_' + str(val) for val in Z_vals]]).apply(series_to_list, axis = 1)
+        # Convert first Z/Z_sun value to 1e-4 (actual value) from 0
+        Z_vals[0] = 1e-4
+        # Create a column which contains the values of log(Z/Z_sun) used
+        data_df['log10(Z/Z_sun)'] = pd.Series([np.log10(Z_vals) for x in range(len(data_df.index))])
+        # Now, expand these 3 aligned lists, with all elements getting their own row (and only take the columns we'll need later)
+        data_df = data_df[['log10(n_H) [cm^{-3}]', 'log10(T) [K]', 'log10(Q_LW) [cm^3 s^{-1}]', 'log10(Q_HI/Q_LW)', 'log10(Q_HeI/Q_LW)',
+                           'log10(Q_HeII/Q_LW)', 'log10(Q_CVI/Q_LW)', 'log10(Q_Al13/Q_LW)', 'log10(Q_CI/Q_LW)', 'log10(Q_C04/Q_LW)',
+                           'log10(Q_C05/Q_LW)', 'log10(Q_O06/Q_LW)', 'log10(Q_O08/Q_LW)', 'log10(Q_F09/Q_LW)', 'log10(Q_Ne10/Q_LW)',
+                           'log10(Q_Na11/Q_LW)', 'log10(Q_Si14/Q_LW)', 'log10(Q_S16/Q_LW)', 'log10(Q_Ar18/Q_LW)', 'log10(Q_Ca20/Q_LW)',
+                           'log10(Q_MgI/Q_LW)', 'log10(Q_MgII/Q_LW)', 'log10(Q_MgIII/Q_LW)', 'log10(Q_MgIV/Q_LW)', 'log10(Q_MgV/Q_LW)',
+                           'log10(Q_MgVI/Q_LW)', 'log10(Q_MgVII/Q_LW)', 'log10(Q_MgVIII/Q_LW)', 'log10(Q_MgIX/Q_LW)', 'log10(Q_MgX/Q_LW)',
+                           'log10(Q_MgXI/Q_LW)', 'log10(Q_MgXII/Q_LW)', 'log10(Q_FeI/Q_LW)', 'log10(Q_FeII/Q_LW)', 'log10(Q_FeIII/Q_LW)',
+                           'log10(Q_FeIV/Q_LW)', 'log10(Q_FeV/Q_LW)', 'log10(Q_FeVI/Q_LW)', 'log10(Q_FeVII/Q_LW)', 'log10(Q_FeVIII/Q_LW)',
+                           'log10(Q_FeIX/Q_LW)', 'log10(Q_FeX/Q_LW)', 'log10(Q_FeXI/Q_LW)', 'log10(Q_FeXII/Q_LW)', 'log10(Q_FeXIII/Q_LW)',
+                           'log10(Q_FeXIV/Q_LW)', 'log10(Q_FeXV/Q_LW)', 'log10(Q_FeXVI/Q_LW)', 'log10(Q_FeXVII/Q_LW)', 'log10(Q_FeXVIII/Q_LW)',
+                           'log10(Q_FeXIX/Q_LW)', 'log10(Q_FeXX/Q_LW)', 'log10(Q_FeXXI/Q_LW)', 'log10(Q_FeXXII/Q_LW)', 'log10(Q_FeXXIII/Q_LW)',
+                           'log10(Q_FeXXIV/Q_LW)', 'log10(Q_FeXXV/Q_LW)', 'log10(Q_FeXXVI/Q_LW)', 
+                           'log10(Z/Z_sun)', 'log10(CF) [erg cm^{3} s^{-1}]', 'log10(HF) [erg cm^{3} s^{-1}]'
+                           ]].explode(['log10(Z/Z_sun)', 'log10(CF) [erg cm^{3} s^{-1}]', 'log10(HF) [erg cm^{3} s^{-1}]'], ignore_index = True)
+        # Convert the expanded columns to float (rather than 'object' datatype), needed for XGBoost to handle the data table
+        data_df['log10(Z/Z_sun)'] = data_df['log10(Z/Z_sun)'].astype(float)
+        data_df['log10(CF) [erg cm^{3} s^{-1}]'] = data_df['log10(CF) [erg cm^{3} s^{-1}]'].astype(float)
+        data_df['log10(HF) [erg cm^{3} s^{-1}]'] = data_df['log10(HF) [erg cm^{3} s^{-1}]'].astype(float)
 
     # Make the target column
     data_df['target'] = data_df[target]
