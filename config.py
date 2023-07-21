@@ -25,6 +25,7 @@ def read_config_file(model_dir):
     -train_frac (flt): Fraction of data to use for training (90%), rest for testing the trained model.
     -do_hp_val (bool): Flag determing whether or not to perform hyperparameter validation on 10% of the training data. 
     -features (list): List of parameters to use as features in the XGBoost model.
+    -hp_search_space (dict): Dictionary containing hyperparameters and ranges to search over in Bayesian hyperparameter optimization.
     '''
 
     # Set up configuration file parsing
@@ -61,12 +62,20 @@ def read_config_file(model_dir):
     # If this flag is set to False, make sure there's a corresponding optimized hyperparameters file
     # If not, throw a warning
     if config_entries['do_hp_val'] == False:
-        if not os.path.exists(model_dir + '/hp_val_best_params.pkl'):
+        if not os.path.exists(model_dir + '/hp_val_best_params.txt'):
             # If not, issue a warning
-            warnings.warn('No optimized hyperparameters found in model directors. Please run hyperparameter optimization'
-                          + ' (rungrid.py or runsciopt.py) before training model.')
+            warnings.warn('No optimized hyperparameters found in model directory.  Please set do_hp_val = True in config file.')
     
     # Get list of features for the XGBoost model
     config_entries['features'] = [key + '_feat' for key in config['features']]
-    
+
+    # Set up dictionary for hyperparameter search space dimensions
+    hp_search_space = {}
+    # Loop through names of hyperparameters in the grid search only if flag to do hyperparameter validation is set to true
+    if config_entries['do_hp_val'] == True:
+        for key in config['hp_search_space']:
+            hp_search_space[key] = [float(x.strip()) for x in config['hp_search_space'][key].split(',')]
+        # Put this dictionary into config_entries
+        config_entries['hp_search_space'] = hp_search_space
+        
     return config_entries

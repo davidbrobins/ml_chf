@@ -19,6 +19,8 @@ import hp_val_tools
 import model_training
 # Module to evaluate model
 import model_evaluation
+# Timing module
+import time
 
 # Unpack command line arguments (this file, path to config file directory)
 (pyfilename, model_dir) = sys.argv
@@ -41,17 +43,24 @@ split_data = ml_preprocessing.get_split_xgboost_data(data_df, config_entries['fe
 # Check whether to perform hyperparameter validation or not:
 if config_entries['do_hp_val'] == True:
     # If so, do hyperparameter optimization
-    best_params = hp_val_tools.do_bayes_search(split_data['hp_val_features'], split_data['hp_val_labels'], model_dir)
+    best_params = hp_val_tools.do_bayes_search(split_data['hp_val_features'], split_data['hp_val_labels'], config_entries['hp_search_space'], model_dir)
     # Print the optimal hyperparameters found
     print('Best hyperparameters found: \n', best_params)
 # Otherwise, existing file of best hyperparameters will be used to train the model
-    
+
+# Time before training
+start = time.time()
 # Train the model
 model = model_training.train_model(split_data['train_features'], split_data['train_labels'], model_dir)
+# Write the value to a file
+with open(model_dir + '/time_to_train.txt', 'w') as file:
+    file.write(str(time.time()-start))
 
-# Evaluate the model on test data
-model_results = model_evaluation.evaluate_model(split_data['test_features'],
-                                                split_data['test_labels'], model,
-                                                config_entries['features'],
-                                                model_dir)
+# Evaluate the model on test data only if train_frac < 1.0
+if config_entries['train_frac'] < 1.0:
+    model_results = model_evaluation.evaluate_model(split_data['test_features'],
+                                                    split_data['test_labels'], model,
+                                                    config_entries['features'],
+                                                    model_dir)
+
 

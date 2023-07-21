@@ -2,8 +2,8 @@
 
 # Import xgboost
 import xgboost as xgb
-# Import loading from pickle
-from pickle import load
+# Import JSON to read in best hyperparameters (if needed)
+import json
 
 def train_model(train_features, train_labels, model_dir):
     '''
@@ -16,7 +16,9 @@ def train_model(train_features, train_labels, model_dir):
     model (XGBoost model): The trained model (also saved).
     '''
 
-    hyperparams = load(open(model_dir + '/hp_val_best_params.pkl', 'rb'))
+    # Read in optimal hyperparameters
+    with open(model_dir + 'hp_val_best_params.txt', 'r') as file:
+        hyperparams = json.loads(file.read())
     # Set up to run on gpu
     hyperparams['tree_method'] = 'gpu_hist'
     # Set up the model (with scikit learn API to save more about the model)

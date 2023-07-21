@@ -31,10 +31,18 @@ def get_split_xgboost_data(data_df, features, train_frac, random_seed, do_hp_val
     # get dataframe containing just target column
     target_df = data_df[['target']]
 
-    # Do the train-test search split, using training fraction and random seed supplied
-    train_features, test_features, train_labels, test_labels = train_test_split(features_df, target_df, 
-                                                                            test_size = 1 - train_frac,
-                                                                            random_state = random_seed)
+    # Do the train-test search split (if train_frac is less than 100%), using training fraction and random seed supplied
+    if train_frac < 1.0:
+        train_features, test_features, train_labels, test_labels = train_test_split(features_df, target_df, 
+                                                                                    test_size = 1 - train_frac,
+                                                                                    random_state = random_seed)
+    else: # Otherwise, training set is the entire grid data
+        train_features = features_df
+        train_labels = target_df
+        # Package just these in a dictionary and return it
+        split_data = {'train_features': train_features, 'train_labels': train_labels}
+        return split_data
+    
     # If do_hp_val flag is set to true, perform another split, this time separating 10% of the test data
     # to use for hyperparameter validation
     if do_hp_val == True:
