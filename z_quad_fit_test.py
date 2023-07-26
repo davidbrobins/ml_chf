@@ -262,5 +262,5 @@ xgb_err_cdf.to_pickle(model_dir + '/' + rate_set + '/quad_fit_cdf.pkl')
 
 # Get lines with error above 1
 high_errs = eval_data.loc[(eval_data['xgb_quad_err_CF'] > 1) | (eval_data['xgb_quad_err_HF'] > 1)]
-high_errs = high_errs[['Z/Z_sun', 'CF [erg cm^3 s^{-1}]', 'HF [erg cm^3 s^{-1}]', 'xgb_quad_fit_CF', 'xgb_quad_fit_HF', 'file_num', 'log10(T) [K]']
+high_errs = high_errs[['Z/Z_sun', 'CF [erg cm^3 s^{-1}]', 'HF [erg cm^3 s^{-1}]', 'xgb_quad_fit_CF', 'xgb_quad_fit_HF', 'file_num', 'log10(T) [K]']]
 print(high_errs)
