@@ -1,5 +1,5 @@
 # Test quadratic fit over XGBoost models in Z/Z_sun (with fixed feature set)
-# Syntax to run python z_interp_test.py model_dir/ rate_set model_type
+# Syntax to run python z_interp_test.py model_dir/ rate_set
 
 # Imports
 import sys # Command line argument handling
@@ -15,8 +15,8 @@ from scipy.optimize import minimize, minimize_scalar # Numerical minimization to
 #initialize CF with values from cf_table.I2.dat
 CHF_gh12.frtinitcf(0,'cf_table.I2.dat')
 
-# Unpack command line arguments (this file, directory where models live, rate set, CF or HF)
-(pyfilename, model_dir, rate_set, model_type) = sys.argv
+# Unpack command line arguments (this file, directory where models live, rate set)
+(pyfilename, model_dir, rate_set) = sys.argv
 
 # Define the shape of the dataframe to hold the evaluation data
 eval_data = pd.DataFrame(columns = ['log10(n_H) [cm^{-3}]', 'log10(Z/Z_sun)', 'log10(u_0)', 'log10(Q_LW) [cm^3 s^{-1}]',
@@ -104,27 +104,29 @@ print('After metallicity cut: ', len(eval_data.index))
 Z_dir_labels = ['0', '0.1', '0.3', '1', '3']
 for scaled_Z in Z_dir_labels:
     print('Z/Z_sun=' + scaled_Z)
-    # Assemble the appropriate directory name
-    dir_name = model_dir + '/' + rate_set + '/all_data/' + model_type + '_Z_' + scaled_Z + '/'
-    # Read in the scalers
-    scalers = load(open(dir_name + 'scalers.pkl', 'rb'))
-    # Get list of feature names from config file
-    config = configparser.ConfigParser()
-    config.read(dir_name + 'config.ini')
-    features = [key + '_feat' for key in config['features']]
-    # Loop through features
-    for feature_name in features:
-        # Get the appropriate scaler
-        feat_scaler = scalers[feature_name]
-        # Scale the feature and put it in the dataframe
-        eval_data[feature_name] = feat_scaler.transform(eval_data[get_col_names(feature_name)].values.reshape(-1,1))
-    print('Scaled features...')
-    # Read in the XGBoost model
-    model = xgb.XGBRegressor()
-    model.load_model(dir_name + 'trained_model.txt')
-    print('Read in model...')
-    eval_data['xgb_' + model_type + '_Z_' + scaled_Z] = model.predict(eval_data[features])
-    print('Trained model...')
+    for model_type in ['CF', 'HF']:
+        print(model_type)
+        # Assemble the appropriate directory name
+        dir_name = model_dir + '/' + rate_set + '/all_data/' + model_type + '_Z_' + scaled_Z + '/'
+        # Read in the scalers
+        scalers = load(open(dir_name + 'scalers.pkl', 'rb'))
+        # Get list of feature names from config file
+        config = configparser.ConfigParser()
+        config.read(dir_name + 'config.ini')
+        features = [key + '_feat' for key in config['features']]
+        # Loop through features
+        for feature_name in features:
+            # Get the appropriate scaler
+            feat_scaler = scalers[feature_name]
+            # Scale the feature and put it in the dataframe
+            eval_data[feature_name] = feat_scaler.transform(eval_data[get_col_names(feature_name)].values.reshape(-1,1))
+        print('Scaled features...')
+        # Read in the XGBoost model
+        model = xgb.XGBRegressor()
+        model.load_model(dir_name + 'trained_model.txt')
+        print('Read in model...')
+        eval_data['xgb_' + model_type + '_Z_' + scaled_Z] = model.predict(eval_data[features])
+        print('Trained model...')
 
 # Interpolation in Z/Z_sun
 # Create an array of the numerical values of Z/Z_sun
@@ -137,7 +139,7 @@ def fitting_func(Z, params):
     A = params[0]
     B = params[1]
     C = params[2]
-    # Quadratic fit (change for other fit)
+    # Quadratic fit
     return A + B * Z + C * (Z ** 2)
 # Define a function to calculate chi-squared
 def chi_squared(fit_vals, true_vals):
@@ -175,48 +177,51 @@ def constraint(params, true_vals):
         return 1e10
 # Define function to minimize
 def func_to_min(params, Z_vals, true_vals):
+    # Given the fit parameters, get the predictions at Z_vals
     fit_vals = fitting_func(Z_vals, params)
+    # The function being minimized is the chi-squared from the fit, plus the constraint term (0 if the fit obeys the constraint, 1e10 otherwise)
     return chi_squared(fit_vals, true_vals) + constraint(params, true_vals)
 # Create a wrapper function to apply the interpolation
 def Z_quad_fit(input_array, Z_array = Z_vals):
+    # Input array consists of [metallicity to fit at, log(CF or HF) evaluated at Z/Z_sun={0, 0.1, 0.3, 1, 3}]
     Z = input_array[0]
     # Do fit in CF/HF (not log)
     model_along_Z_array = 10**input_array[1:]
-    # Minimize func_to_min with appropriate arguments
+    # Set initial guess, which is a quadratic going through the points Z/Z_sun=0, 1, and 3
     x0 = [model_along_Z_array[0],
           1/6*(-model_along_Z_array[4] + 9*model_along_Z_array[3] - 8*model_along_Z_array[0]),
           1/6*(model_along_Z_array[4] - 3*model_along_Z_array[3] + 2*model_along_Z_array[0])]
+    # This doesn't always obey the constraint, so add points in the initial simplex that do (constant at Z=0 value, lines through Z/Z_sun=0 and 3, and 0 and 0.1)
     initial_simplex = [x0, [model_along_Z_array[0], 0, 0],
                        [model_along_Z_array[0], 1/3*(model_along_Z_array[4] - model_along_Z_array[0]), 0],
                        [model_along_Z_array[0], 10*(model_along_Z_array[1] - model_along_Z_array[0]), 0]]
+    # Run a simplex minimizer starting with the simplex above
     fit_params_a = minimize(func_to_min, x0, method = 'nelder-mead', args = (Z_array, model_along_Z_array), options = {'initial_simplex' : initial_simplex}).x
-    print('First optimization: ', fit_params_a, func_to_min(fit_params_a, Z_array, model_along_Z_array))
+    # print('First optimization: ', fit_params_a, func_to_min(fit_params_a, Z_array, model_along_Z_array))
+    # Boolean to check if the optimization has converged
     are_params_close = False
+    # Counter to keep track of the number of optimizations
     counter = 1
+    # Loop until two consecutive optimization iterations return sufficiently similar values
     while not are_params_close:
+        # Create a starting simplex with the result of the previous minimization, plus each parameter multiplied by a percentage drawn from a Gaussian
         new_simplex = [fit_params_a, [(1 + np.random.normal()) * fit_params_a[0], fit_params_a[1], fit_params_a[2]],
                        [fit_params_a[0], (1 + np.random.normal()) * fit_params_a[1], fit_params_a[2]],
                        [fit_params_a[0], fit_params_a[1], (1 + np.random.normal()) * fit_params_a[2]]]
+        # RErun the minimization from this new simplex
         fit_params_b = minimize(func_to_min, fit_params_a, method = 'nelder-mead', args = (Z_array, model_along_Z_array), options = {'initial_simplex' : new_simplex}).x
+        # Check if the best parameter from this step are within a tolerance of the parameters from the previous step (if so, the loop stops)
         are_params_close = np.allclose(fit_params_a, fit_params_b, atol = 0)
+        # Iterate the stored best parameters, counter
         fit_params_a = fit_params_b
         counter += 1
-        print('Iteration ' + str(counter) + ': ', fit_params_a, func_to_min(fit_params_a, Z_array, model_along_Z_array))
+        # print('Iteration ' + str(counter) + ': ', fit_params_a, func_to_min(fit_params_a, Z_array, model_along_Z_array))
+    # Return the fit parameters (to be able to plot the fit function if desired), and the fit evaluated at the given metallicity
     return fit_params_a[0], fit_params_a[1], fit_params_a[2], fit_params_a[0] + fit_params_a[1] * Z + fit_params_a[2] * (Z ** 2)
-    '''
-    # Set up matrices for minimizing chi squared
-    M = np.array([[np.sum(Z_array**4), np.sum(Z_array**3), np.sum(Z_array**2)],
-                  [np.sum(Z_array**3), np.sum(Z_array**2), np.sum(Z_array)],
-                  [np.sum(Z_array**2), np.sum(Z_array), len(Z_array)]])
-    N = np.array([np.sum((model_along_Z_array) * Z_array * Z_array),
-                  np.sum((model_along_Z_array) * Z_array),
-                  np.sum(model_along_Z_array)])
-    # Get coefficients from solving Mx=N, where x = [A B]
-    coeffs = np.linalg.solve(M, N)
-    return 10**(coeffs[0]* Z**2 + coeffs[1] * Z + coeffs[2])
-    '''
+
 # Do quadratic fit in Z/Z_sun
-eval_data[['A', 'B', 'C', 'xgb_quad_fit']] = eval_data[['Z/Z_sun'] + ['xgb_' + model_type + '_Z_' + scaled_Z for scaled_Z in Z_dir_labels]].apply(Z_quad_fit, axis = 1, result_type = 'expand')
+eval_data[['A_CF', 'B_CF', 'C_CF', 'xgb_quad_fit_CF']] = eval_data[['Z/Z_sun'] + ['xgb_CF_Z_' + scaled_Z for scaled_Z in Z_dir_labels]].apply(Z_quad_fit, axis = 1, result_type = 'expand')
+eval_data[['A_HF', 'B_HF', 'C_HF', 'xgb_quad_fit_HF']] = eval_data[['Z/Z_sun'] + ['xgb_HF_Z_' + scaled_Z for scaled_Z in Z_dir_labels]].apply(Z_quad_fit, axis = 1, result_type = 'expand')
 print('Did quadratic fit in Z...')
 
 # Define a helper function to calculate error in log(CHF), and return 1000 if CHF prediction is negative                                                                         
@@ -230,66 +235,32 @@ def get_err(input_array):
     # Otherwise, calculate |log(truth/prediction)|                                                                                                                               
     else:
         return np.abs(np.log10(truth/pred))
+
 # Calculate errors for these interpolations
-eval_data['xgb_quad_err'] = eval_data[[model_type + ' [erg cm^3 s^{-1}]', 'xgb_quad_fit']].apply(get_err, axis = 1)
+eval_data['xgb_quad_err_CF'] = eval_data[['CF [erg cm^3 s^{-1}]', 'xgb_quad_fit_CF']].apply(get_err, axis = 1)
+eval_data['xgb_quad_err_HF'] = eval_data[['HF [erg cm^3 s^{-1}]', 'xgb_quad_fit_HF']].apply(get_err, axis = 1)
+# Get error in max of CF/HF
+eval_data['xgb_quad_err_max'] = eval_data['xgb_quad_err_CF'] * (eval_data['CF [erg cm^3 s^{-1}]'] > eval_data['HF [erg cm^3 s^{-1}]']) + eval_data['xgb_quad_err_HF'] * (1 - (eval_data['CF [erg cm^3 s^{-1}]'] > eval_data['HF [erg cm^3 s^{-1}]']))
 
 # Get sorted arrays of errors in CF, HF, max
-err_quad_Z = np.sort(eval_data['xgb_quad_err'].values)
+CF_err_xgb_quad = np.sort(eval_data['xgb_quad_err_CF'].values)
+HF_err_xgb_quad = np.sort(eval_data['xgb_quad_err_HF'].values)
+max_err_xgb_quad = np.sort(eval_data['xgb_quad_err_max'].values)
 # Length of all of this is just length of index of eval_data
 length = len(eval_data.index)
 # Get 1 - CDF
 freq = (length - np.arange(length)) / length
 print('Got CDF')
 
-'''
 # Save it to a file
-xgb_err_cdf = pd.DataFrame(index = range(len(freq)), columns = ['err_interp_Z', 'err_interp_Z_2', 'err_interp_Z_0.5', 'freq'])
-xgb_err_cdf['err_interp_Z'] = err_interp_Z
-xgb_err_cdf['err_interp_Z_2'] = err_interp_Z_2
-xgb_err_cdf['err_interp_Z_0.5'] = err_interp_Z_0p5
+xgb_err_cdf = pd.DataFrame(index = range(len(freq)), columns = ['CF_err_xgb_quad', 'HF_err_xgb_quad', 'max_err_xgb_quad', 'freq'])
+xgb_err_cdf['CF_err_xgb_quad'] = CF_err_xgb_quad
+xgb_err_cdf['HF_err_xgb_quad'] = HF_err_xgb_quad
+xgb_err_cdf['max_err_xgb_quad'] = max_err_xgb_quad
 xgb_err_cdf['freq'] = freq
-xgb_err_cdf.to_pickle(model_dir + '/' + rate_set + '/' + model_type + '_interp_cdf.pkl')
-'''
-
-# Read in GH12 CDF
-gh12_err_cdf = load(open('data/evaluation_data/gh12_err_cdf.pkl', 'rb'))
-
-# Define step size for downsampling
-step = 1
-plt.plot(gh12_err_cdf[model_type + '_err_gh12'][::step], gh12_err_cdf['freq'][::step], linestyle = 'solid', label = 'GH12')
-plt.plot(err_quad_Z[::step], freq[::step], linestyle = 'dashed', label = 'XGBoost + quadratic fit')
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([0.01, 2]) # upper lim = 2 to match Gnedin and Hollon 2012 paper
-plt.ylim([1e-6, 1])
-plt.xlabel('$\Delta \log \mathcal{F}$')
-plt.ylabel('$F(>\Delta \log \mathcal{F})$')
-plt.title(model_type + ', ' + rate_set)
-plt.legend()
-#plt.savefig(model_dir + '/' + rate_set + '/' + model_type + '_err_cdf_test.pdf')
-# Just for first test
-plt.savefig('quad_fit_test.png')
-plt.close()
-print('Made error CDF plots')
-print('Done!')
-
+xgb_err_cdf.to_pickle(model_dir + '/' + rate_set + '/quad_fit_cdf.pkl')
 
 # Get lines with error above 1
-high_errs = eval_data.loc[eval_data['xgb_quad_err'] > 1]
-high_errs = high_errs[['Z/Z_sun', model_type + ' [erg cm^3 s^{-1}]', 'file_num', 'log10(T) [K]', 'A', 'B', 'C', 'xgb_quad_fit'] + ['xgb_' + model_type + '_Z_' + scaled_Z for scaled_Z in Z_dir_labels]]
+high_errs = eval_data.loc[(eval_data['xgb_quad_err_CF'] > 1) | (eval_data['xgb_quad_err_HF'] > 1)]
+high_errs = high_errs[['Z/Z_sun', 'CF [erg cm^3 s^{-1}]', 'HF [erg cm^3 s^{-1}]', 'xgb_quad_fit_CF', 'xgb_quad_fit_HF', 'file_num', 'log10(T) [K]']
 print(high_errs)
-
-for i in range(10):                                                                                                                                                              
-    CF_vs_Z = high_errs.iloc[i]                                                                                                                                              
-    print(CF_vs_Z)                                                                                                                                                               
-    plt.scatter(Z_vals, 10**CF_vs_Z[['xgb_' + model_type + '_Z_' + scaled_Z for scaled_Z in Z_dir_labels]], color = 'orange', label = 'XGBoost')                           
-    plt.scatter(CF_vs_Z['Z/Z_sun'], CF_vs_Z[model_type + ' [erg cm^3 s^{-1}]'], color = 'green', label = 'True value')
-    # Create array of Z value to plot quadratic at
-    plot_Z = np.linspace(0, 3, 100)
-    plt.plot(plot_Z, CF_vs_Z['A'] + CF_vs_Z['B'] * plot_Z + CF_vs_Z['C'] * plot_Z ** 2, color = 'orange', label = 'Quadratic fit')
-    plt.legend()                                                                                                                                                                 
-    plt.xlabel('$Z/Z_\odot$')                                                                                                                                                    
-    plt.ylabel(model_type + ' [erg cm^3 s^{-1}]')                                                                                                                                
-    plt.savefig('CF_vs_Z_test_' + str(i) + '.png')                                                                                                                               
-    plt.close()   
-
