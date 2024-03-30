@@ -49,11 +49,12 @@ def get_training_data(data_path, target, output, Z_vals):
                           usecols = [0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20], names = chf_cols)
         # Merge the chf and p_rates_all dataframes on the matching columns (fq, tau0)
         merged = chf.merge(binned_rfs, on = ['log10(f_q)', 'log10(tau_0)'])
-        # Scale average RF in each bin by the value of 0.5-1 Ry bin
-        for col in rf_bin_cols[3:]:
-            merged[col] = np.log10(merged[col]) - np.log10(merged['0.5_to_1_Ry'])
-        # Scale average RF in 0.5-1 Ry bin by u0
-        merged['0.5_to_1_Ry'] = np.log10(merged['0.5_to_1_Ry']) +  merged['log10(J_0/n_b/J_{MW})']
+        # Scale average RF in each bin by the value of 1-4 Ry bin
+        for col in rf_bin_cols[4:]:
+            merged[col] = np.log10(merged[col]) - np.log10(merged['1_to_4_Ry'])
+        merged['0.5_to_1_Ry'] = np.log10(merged['0.5_to_1_Ry']) - np.log10(merged['1_to_4_Ry'])
+        # Scale average RF in 1-4 Ry bin by u0
+        merged['1_to_4_Ry'] = np.log10(merged['1_to_4_Ry']) +  merged['log10(J_0/n_b/J_{MW})']
         
         # Add a column with the alpha value
         merged['alpha'] = alpha
