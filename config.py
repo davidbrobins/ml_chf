@@ -21,6 +21,8 @@ def read_config_file(model_dir):
     -target (str): String labelling the target for XGBoost to predict.                                                                            
     -output (str): String specifying whether to read in CF or HF from data table.                                                                     
     -Z_vals (list): List of Z/Z_sun values to read in from data table.
+    -rf_feats (str): Type of RF averaging to use ('bins' or 'rates')
+    -scale_with_1_4_ry (bool): Whether or not to scale RF bins by the 1-4 Ry bin instead of 0.5-1 Ry (defaults to False)
     -random_seed (int): Random seed (for reproducibility)
     -train_frac (flt): Fraction of data to use for training (90%), rest for testing the trained model.
     -do_hp_val (bool): Flag determing whether or not to perform hyperparameter validation on 10% of the training data. 
@@ -52,6 +54,17 @@ def read_config_file(model_dir):
                 config_entries['Z_vals'] = [allowed_Z]
     else: # If not, read in all Z values in the training data table
         config_entries['Z_vals'] = [0, 0.1, 0.3, 1, 3]
+    # Read in the categorical value for what RF feature type to use
+    config_entries['rf_feats'] = config['IO']['rf_feats']
+    # If rf_feats = bins, set scale_by_1_4_ry
+    if config_entries['rf_feats'] == 'bins':
+        # Check if value is set in config file
+        if 'scale_by_1_4_ry' in config['IO']:
+            # If so, set the flag to True
+            config_entries['scale_with_1_4_ry'] = True
+        # Otherwise, set it to False
+        else:
+            config_entires['bin_with_amp'] = False        
         
     # Get random seed as an integer
     config_entries['random_seed'] = int(config['ml_data_prep']['random_seed'])
