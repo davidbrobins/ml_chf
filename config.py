@@ -56,15 +56,13 @@ def read_config_file(model_dir):
         config_entries['Z_vals'] = [0, 0.1, 0.3, 1, 3]
     # Read in the categorical value for what RF feature type to use
     config_entries['rf_feats'] = config['IO']['rf_feats']
-    # If rf_feats = bins, set scale_by_1_4_ry
-    if config_entries['rf_feats'] == 'bins':
-        # Check if value is set in config file
-        if 'scale_by_1_4_ry' in config['IO']:
-            # If so, set the flag to True
-            config_entries['scale_with_1_4_ry'] = True
+    # Set scale_with_1_4_ry (Note: this is only used if rf_feats = bins)
+    if 'scale_with_1_4_ry' in config['IO']:
+        # If so, set the flag to True
+        config_entries['scale_with_1_4_ry'] = True
         # Otherwise, set it to False
-        else:
-            config_entires['bin_with_amp'] = False        
+    else:
+        config_entries['scale_with_1_4_ry'] = False        
         
     # Get random seed as an integer
     config_entries['random_seed'] = int(config['ml_data_prep']['random_seed'])

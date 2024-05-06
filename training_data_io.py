@@ -80,7 +80,7 @@ def get_training_data(data_path, rf_feats, target, output, Z_vals, scale_with_1_
         # If using bins...
         if rf_feats == 'bins':
             # If scale_by_1_4_ry is True:
-            if scale_by_1_4_ry == True:
+            if scale_with_1_4_ry == True:
                 # Scale average RF in each bin by the value of 1-4 Ry bin
                 for col in rf_bin_cols[4:]:
                     merged[col] = np.log10(merged[col]) - np.log10(merged['1_to_4_Ry'])

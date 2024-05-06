@@ -29,8 +29,8 @@ import time
 config_entries = config.read_config_file(model_dir)
 
 # Read in data
-data_df = training_data_io.get_training_data(config_entries['data_path'], config_entries['target'], config_entries['output'],
-                                             config_entries['Z_vals'])
+data_df = training_data_io.get_training_data(config_entries['data_path'], config_entries['rf_feats'], config_entries['target'], config_entries['output'],
+                                             config_entries['Z_vals'], config_entries['scale_with_1_4_ry'])
 
 # Apply feature and target scaling
 data_df = data_scaling.rescale(config_entries['features'], config_entries['target'], data_df, model_dir)
